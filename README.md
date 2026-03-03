@@ -41,7 +41,7 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
 
 🔹 Ingest
 
-+Consome API de câmbio
++ Consome API de câmbio
 
 +alida resposta
 
