@@ -20,6 +20,7 @@ Fluxo completo:
 API → Raw JSON → Transform → Parquet → PostgreSQL
 
 🏗 Arquitetura
+
     ┌────────────┐
     │   FX API   │
     └──────┬─────┘
