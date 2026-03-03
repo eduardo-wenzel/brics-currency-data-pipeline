@@ -1,14 +1,15 @@
 #🚀 BRICS Currency Data Pipeline
+------------------------------------------------
 
-#📌 Overview
+##📌 Overview
 
 Este projeto implementa um pipeline de dados modular para ingestão, transformação e persistência de taxas de câmbio obtidas via API externa.
 
 A arquitetura foi projetada com foco em:
 
--Separação de responsabilidades (Ingest, Transform, Load)
++Separação de responsabilidades (Ingest, Transform, Load)
 
--Persistência auditável (Raw e Processed)
++Persistência auditável (Raw e Processed)
 
 +Idempotência via UPSERT no PostgreSQL
 
@@ -20,7 +21,7 @@ Fluxo completo:
 
 API → Raw JSON → Transform → Parquet → PostgreSQL
 
-#🏗 Arquitetura
+##🏗 Arquitetura
 
     ┌────────────┐
     │   FX API   │
@@ -37,13 +38,14 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
       (Load Layer)
            │
     PostgreSQL - UPSERT
-  
+
+  --------------------------------------
 
 🔹 Ingest
 
 + Consome API de câmbio
 
-+alida resposta
++Valida resposta
 
 +Persiste payload bruto em data/raw
 
@@ -68,6 +70,8 @@ Conecta ao PostgreSQL
 Executa INSERT ... ON CONFLICT
 
 Garante idempotência e integridade via índice único
+
+-------------------------------------------------------
 
 #🧠 Modelagem
 
@@ -105,6 +109,8 @@ Constraint:
 
 +Logging nativo
 
+------------------------------
+
 ▶ Como Executar
 
 Criar banco PostgreSQL
@@ -134,6 +140,8 @@ Instalar dependências:
 Executar:
 
 ```python src/pipeline.py```
+
+------------------------------------------
 
 📊 Evoluções Futuras
 
