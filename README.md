@@ -136,7 +136,8 @@ Instalar dependências:
 
 Executar:
 
-python src/pipeline.py
+```python src/pipeline.py```
+
 📊 Evoluções Futuras
 
 Containerização com Docker
