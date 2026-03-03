@@ -6,15 +6,15 @@ Este projeto implementa um pipeline de dados modular para ingestão, transforma�
 
 A arquitetura foi projetada com foco em:
 
-Separação de responsabilidades (Ingest, Transform, Load)
++Separação de responsabilidades (Ingest, Transform, Load)
 
-Persistência auditável (Raw e Processed)
++Persistência auditável (Raw e Processed)
 
-Idempotência via UPSERT no PostgreSQL
++Idempotência via UPSERT no PostgreSQL
 
-Validação estrutural do payload da API
++Validação estrutural do payload da API
 
-Configuração via variáveis de ambiente
++Configuração via variáveis de ambiente
 
 Fluxo completo:
 
@@ -41,25 +41,25 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
 
 🔹 Ingest
 
-> Consome API de câmbio
++Consome API de câmbio
 
->alida resposta
++alida resposta
 
->Persiste payload bruto em data/raw
++Persiste payload bruto em data/raw
 
->Loga quantidade de moedas recebidas
++Loga quantidade de moedas recebidas
 
 🔹 Transform
 
->Lê o arquivo raw mais recente
++Lê o arquivo raw mais recente
 
->Valida estrutura esperada
++Valida estrutura esperada
 
->Usa base_code e time_last_update_utc
++Usa base_code e time_last_update_utc
 
->Gera DataFrame estruturado
++Gera DataFrame estruturado
 
->Persiste em Parquet
++Persiste em Parquet
 
 🔹 Load
 
@@ -71,43 +71,39 @@ Garante idempotência e integridade via índice único
 
 #🧠 Modelagem
 
-Tabela principal:
+Tabela analytics.fact_exchange_rate
 
-analytics.fact_exchange_rate
++base_currency
 
-Campos:
++target_currency
 
-base_currency
++rate
 
-target_currency
++reference_date
 
-rate
-
-reference_date
-
-created_at
++created_at
 
 Constraint:
 
-Índice único em (base_currency, target_currency, reference_date)
++Índice único em (base_currency, target_currency, reference_date)
 
-Isso evita duplicidade e permite atualização segura de taxas.
++Isso evita duplicidade e permite atualização segura de taxas.
 
 🛠 Tecnologias Utilizadas
 
-Python
++Python
 
-Pandas
++Pandas
 
-PostgreSQL
++PostgreSQL
 
-psycopg2
++psycopg2
 
-Requests
++Requests
 
-python-dotenv
++python-dotenv
 
-Logging nativo
++Logging nativo
 
 ▶ Como Executar
 
