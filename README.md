@@ -35,6 +35,7 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
              (Load Layer)
                   │
         PostgreSQL - UPSERT
+        
 🔹 Ingest
 
 Consome API de câmbio
