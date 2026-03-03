@@ -1,8 +1,13 @@
 import requests
 import json
-from datetime import datetime
+import time
 from pathlib import Path
 import logging
+import os
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
 # Garante que a pasta de logs exista
 log_dir = Path("logs")
@@ -14,11 +19,16 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-BASE_URL = "https://open.er-api.com/v6/latest/USD"
-SYMBOLS = "BRL,RUB,INR,CNY,ZAR"
 
+BASE_URL = os.getenv("API_URL")
+CURRENCIES = os.getenv("CURRENCIES")
+
+if not BASE_URL or not CURRENCIES:
+    raise EnvironmentError("Variáveis de ambiente não configuradas corretamente.")
 
 def fetch_exchange_rates():
+    start = time.time()
+
     response = requests.get(BASE_URL, timeout=10)
     response.raise_for_status()
     data = response.json()
@@ -26,8 +36,11 @@ def fetch_exchange_rates():
     if data.get("result") != "success":
         raise Exception("Falha na API")
 
-    return data
+    duration = time.time() - start
+    logging.info(f"{len(data.get('rates', {}))} moedas recebidas da API.")
+    logging.info(f"Tempo de resposta da API: {duration:.2f} segundos.")
 
+    return data
 
 def save_raw_data(data: dict):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -49,8 +62,8 @@ def main():
         file_path = save_raw_data(data)
         logging.info("Pipeline executado com sucesso.")
     except Exception as e:
-        logging.error(f"Erro no pipeline: {e}")
-        raise
+       logging.exception("Erro no pipeline")
+    raise
 
 
 if __name__ == "__main__":
