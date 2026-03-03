@@ -6,9 +6,9 @@ Este projeto implementa um pipeline de dados modular para ingestão, transforma�
 
 A arquitetura foi projetada com foco em:
 
-+Separação de responsabilidades (Ingest, Transform, Load)
+-Separação de responsabilidades (Ingest, Transform, Load)
 
-+Persistência auditável (Raw e Processed)
+-Persistência auditável (Raw e Processed)
 
 +Idempotência via UPSERT no PostgreSQL
 
