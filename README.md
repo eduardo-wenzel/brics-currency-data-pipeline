@@ -28,15 +28,16 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
     (Ingest Layer)
            │
      Raw JSON Storage
-           │
-   (Transform Layer)
+           |
+    (Transform Layer)
            │
     Parquet Storage
            │
       (Load Layer)
            │
     PostgreSQL - UPSERT
-        
+  
+
 🔹 Ingest
 
 Consome API de câmbio
