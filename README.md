@@ -45,23 +45,23 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
 
 + Consome API de câmbio
 
-+Valida resposta
++ Valida resposta
 
-+Persiste payload bruto em data/raw
++ Persiste payload bruto em data/raw
 
-+Loga quantidade de moedas recebidas
++ Loga quantidade de moedas recebidas
 
 🔹 Transform
 
-+Lê o arquivo raw mais recente
++ Lê o arquivo raw mais recente
 
-+Valida estrutura esperada
++ Valida estrutura esperada
 
-+Usa base_code e time_last_update_utc
++ Usa base_code e time_last_update_utc
 
-+Gera DataFrame estruturado
++ Gera DataFrame estruturado
 
-+Persiste em Parquet
++ Persiste em Parquet
 
 🔹 Load
 
@@ -77,37 +77,37 @@ Garante idempotência e integridade via índice único
 
 Tabela analytics.fact_exchange_rate
 
-+base_currency
++ base_currency
 
-+target_currency
++ target_currency
 
-+rate
++ rate
 
-+reference_date
++ reference_date
 
-+created_at
++ created_at
 
 Constraint:
 
-+Índice único em (base_currency, target_currency, reference_date)
++ Índice único em (base_currency, target_currency, reference_date)
 
-+Isso evita duplicidade e permite atualização segura de taxas.
++ Isso evita duplicidade e permite atualização segura de taxas.
 
 🛠 Tecnologias Utilizadas
 
-+Python
++ Python
 
-+Pandas
++ Pandas
 
-+PostgreSQL
++ PostgreSQL
 
-+psycopg2
++ psycopg2
 
-+Requests
++ Requests
 
-+python-dotenv
++ python-dotenv
 
-+Logging nativo
++ Logging nativo
 
 ------------------------------
 
@@ -145,12 +145,12 @@ Executar:
 
 📊 Evoluções Futuras
 
-Containerização com Docker
++ Containerização com Docker
 
-Orquestração com Airflow ou Prefect
++ Orquestração com Airflow ou Prefect
 
-Testes unitários para camada de transformação
++ Testes unitários para camada de transformação
 
-Implementação de camadas Bronze/Silver/Gold
++ Implementação de camadas Bronze/Silver/Gold
 
-Deploy em ambiente cloud
++ Deploy em ambiente cloud
