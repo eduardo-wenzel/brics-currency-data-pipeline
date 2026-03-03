@@ -20,21 +20,21 @@ Fluxo completo:
 API → Raw JSON → Transform → Parquet → PostgreSQL
 
 🏗 Arquitetura
-           ┌────────────┐
-           │  FX API    │
-           └──────┬─────┘
-                  │
-            (Ingest Layer)
-                  │
-           Raw JSON Storage
-                  │
-           (Transform Layer)
-                  │
-            Parquet Storage
-                  │
-             (Load Layer)
-                  │
-        PostgreSQL - UPSERT
+    ┌────────────┐
+    │   FX API   │
+    └──────┬─────┘
+           │
+    (Ingest Layer)
+           │
+     Raw JSON Storage
+           │
+   (Transform Layer)
+           │
+    Parquet Storage
+           │
+      (Load Layer)
+           │
+    PostgreSQL - UPSERT
         
 🔹 Ingest
 
