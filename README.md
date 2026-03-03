@@ -114,7 +114,7 @@ Criar banco PostgreSQL
 
 Criar schema e tabela:
 
-CREATE SCHEMA analytics;
+```CREATE SCHEMA analytics;
 
 CREATE TABLE analytics.fact_exchange_rate (
     id SERIAL PRIMARY KEY,
@@ -127,12 +127,12 @@ CREATE TABLE analytics.fact_exchange_rate (
 
 CREATE UNIQUE INDEX ux_exchange_unique
 ON analytics.fact_exchange_rate (base_currency, target_currency, reference_date);
-
+````
 Criar .env baseado em .env.example
 
 Instalar dependências:
 
-pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 Executar:
 
