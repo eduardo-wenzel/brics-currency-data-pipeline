@@ -41,25 +41,25 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
 
 🔹 Ingest
 
-Consome API de câmbio
+> Consome API de câmbio
 
-Valida resposta
+>alida resposta
 
-Persiste payload bruto em data/raw
+>Persiste payload bruto em data/raw
 
-Loga quantidade de moedas recebidas
+>Loga quantidade de moedas recebidas
 
 🔹 Transform
 
-Lê o arquivo raw mais recente
+>Lê o arquivo raw mais recente
 
-Valida estrutura esperada
+>Valida estrutura esperada
 
-Usa base_code e time_last_update_utc
+>Usa base_code e time_last_update_utc
 
-Gera DataFrame estruturado
+>Gera DataFrame estruturado
 
-Persiste em Parquet
+>Persiste em Parquet
 
 🔹 Load
 
