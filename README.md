@@ -39,7 +39,7 @@ API → Raw JSON → Transform → Parquet → PostgreSQL
            │
     PostgreSQL - UPSERT
 
-  --------------------------------------
+  
 
 🔹 Ingest
 
@@ -92,6 +92,8 @@ Constraint:
 + Índice único em (base_currency, target_currency, reference_date)
 
 + Isso evita duplicidade e permite atualização segura de taxas.
+
+--------------------
 
 🛠 Tecnologias Utilizadas
 
