@@ -1,7 +1,7 @@
 #🚀 BRICS Currency Data Pipeline
 ------------------------------------------------
 
-##📌 Overview
+## 📌 Overview
 
 Este projeto implementa um pipeline de dados modular para ingestão, transformação e persistência de taxas de câmbio obtidas via API externa.
 
@@ -21,7 +21,7 @@ Fluxo completo:
 
 API → Raw JSON → Transform → Parquet → PostgreSQL
 
-##🏗 Arquitetura
+## 🏗 Arquitetura
 
     ┌────────────┐
     │   FX API   │
@@ -73,7 +73,7 @@ Garante idempotência e integridade via índice único
 
 -------------------------------------------------------
 
-#🧠 Modelagem
+## 🧠 Modelagem
 
 Tabela analytics.fact_exchange_rate
 
@@ -95,7 +95,7 @@ Constraint:
 
 --------------------
 
-🛠 Tecnologias Utilizadas
+## 🛠 Tecnologias Utilizadas
 
 + Python
 
@@ -113,7 +113,7 @@ Constraint:
 
 ------------------------------
 
-▶ Como Executar
+## ▶ Como Executar
 
 Criar banco PostgreSQL
 
@@ -145,7 +145,7 @@ Executar:
 
 ------------------------------------------
 
-📊 Evoluções Futuras
+## 📊 Evoluções Futuras
 
 + Containerização com Docker
 
