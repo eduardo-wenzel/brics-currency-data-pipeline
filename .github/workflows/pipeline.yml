@@ -11,11 +11,7 @@ jobs:
     env:
       API_URL: ${{ secrets.API_URL }}
       CURRENCIES: ${{ secrets.CURRENCIES }}
-      PG_HOST: ${{ secrets.PG_HOST }}
-      PG_DATABASE: ${{ secrets.PG_DATABASE }}
-      PG_USER: ${{ secrets.PG_USER }}
-      PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
-      PG_PORT: ${{ secrets.PG_PORT }}
+      SKIP_DB_LOAD: 'true'
 
     steps:
       - name: Checkout
