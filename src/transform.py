@@ -1,7 +1,8 @@
-import json
+﻿import json
 import logging
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 
 
@@ -17,37 +18,39 @@ def get_latest_raw_file():
     return latest_file
 
 
+def _parse_reference_date(raw_value: str):
+    try:
+        return datetime.strptime(raw_value, "%a, %d %b %Y %H:%M:%S %z").date()
+    except ValueError:
+        return datetime.strptime(raw_value, "%Y-%m-%d").date()
+
+
 def transform_latest_file():
     file_path = get_latest_raw_file()
 
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    # Validação estrutural robusta
-    if "conversion_rates" not in data:
-        raise ValueError("Estrutura inesperada: campo 'conversion_rates' não encontrado.")
+    rates = data.get("conversion_rates") or data.get("rates")
+    if not rates:
+        raise ValueError("Estrutura inesperada: taxas de cambio nao encontradas.")
 
-    if "base_code" not in data:
-        raise ValueError("Estrutura inesperada: campo 'base_code' não encontrado.")
+    base_currency = data.get("base_code") or data.get("base")
+    if not base_currency:
+        raise ValueError("Estrutura inesperada: moeda base nao encontrada.")
 
-    if "time_last_update_utc" not in data:
-        raise ValueError("Estrutura inesperada: campo 'time_last_update_utc' não encontrado.")
+    raw_reference_date = data.get("time_last_update_utc") or data.get("date")
+    if not raw_reference_date:
+        raise ValueError("Estrutura inesperada: data de referencia nao encontrada.")
 
-    base_currency = data["base_code"]
-    rates = data["conversion_rates"]
-
-    # Converte data oficial da API
-    reference_date = datetime.strptime(
-        data["time_last_update_utc"],
-        "%a, %d %b %Y %H:%M:%S %z"
-    ).date()
+    reference_date = _parse_reference_date(raw_reference_date)
 
     records = [
         {
-            "base_currency": base_currency,
+            "base_currency": str(base_currency).upper(),
             "target_currency": currency,
             "rate": rate,
-            "reference_date": reference_date
+            "reference_date": reference_date,
         }
         for currency, rate in rates.items()
     ]
