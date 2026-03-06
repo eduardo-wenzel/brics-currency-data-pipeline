@@ -1,91 +1,133 @@
 ﻿# BRICS Currency Data Pipeline
 
-Pipeline de dados que extrai, transforma e carrega cotacoes de moedas em PostgreSQL.
+Pipeline de dados desenvolvido para coletar, processar e analisar taxas de cambio das moedas dos paises do BRICS.
 
-## Execucao manual
+O projeto implementa um fluxo completo de engenharia de dados:
 
-1. Crie e ative um ambiente Python.
-2. Instale dependencias:
+API -> Ingestao -> Transformacao -> Armazenamento -> Analise
+
+Os dados sao coletados automaticamente de APIs publicas de cambio e organizados em um dataset estruturado para analise e visualizacao.
+
+Este projeto demonstra conceitos praticos de:
+- Data Ingestion
+- Data Transformation
+- Data Modeling
+- Data Pipelines
+- Automacao de coleta de dados
+
+## Arquitetura do Pipeline
+
+O pipeline segue as seguintes etapas:
+
+1. Coleta de dados
+- Consome dados de taxas de cambio via API.
+
+2. Processamento
+- Limpeza e padronizacao dos dados.
+- Conversao de tipos e tratamento de valores inconsistentes.
+
+3. Armazenamento
+- Dados estruturados sao armazenados para analises futuras.
+
+4. Analise
+- Os dados podem ser utilizados para analises economicas ou dashboards.
+
+Fluxo resumido:
+
+API -> Python -> Processamento -> Banco de Dados -> Analise
+
+## Tecnologias Utilizadas
+
+- Python
+- Pandas
+- Requests
+- psycopg2
+- python-dotenv
+- PostgreSQL
+- Git / GitHub
+- GitHub Actions
+
+## Como executar o projeto
+
+1. Clone o repositorio
+
+```bash
+git clone https://github.com/eduardo-wenzel/brics-currency-data-pipeline.git
+```
+
+2. Entre na pasta do projeto
+
+```bash
+cd brics-currency-data-pipeline
+```
+
+3. Instale as dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configure variaveis de ambiente copiando `.env.example` para `.env`.
-4. Execute:
+4. Configure as variaveis de ambiente em `.env` (baseie-se em `.env.example`).
+
+5. Execute o pipeline
 
 ```bash
 python src/pipeline.py
 ```
 
-## Persistencia de dados
+## Variaveis de Ambiente
 
-O pipeline grava em duas tabelas de fatos:
-- `analytics.fact_exchange_rate`: snapshot atual por `(base_currency, target_currency, reference_date)` via UPSERT.
-- `analytics.fact_exchange_rate_history`: historico append-only, uma nova linha por moeda a cada execucao.
+- `API_URL`
+- `CURRENCIES`
+- `PG_HOST`
+- `PG_DATABASE`
+- `PG_USER`
+- `PG_PASSWORD`
+- `PG_PORT`
 
-Log de execucao:
-- `analytics.pipeline_run_log`: status (`RUNNING`, `SUCCESS`, `FAILED`), quantidade carregada e mensagem de erro.
+## Persistencia e Historico
 
-Script SQL de criacao:
-- `sql/001_create_exchange_tables.sql`
+O projeto grava dados em:
 
-Consultas uteis:
+- `analytics.fact_exchange_rate`: snapshot atual (UPSERT)
+- `analytics.fact_exchange_rate_history`: historico temporal (append-only)
+- `analytics.pipeline_run_log`: status de execucao, erro e quantidade carregada
+
+Exemplo de analise historica:
 
 ```sql
--- Serie temporal por moeda
-SELECT reference_date, loaded_at, rate
+SELECT target_currency AS currency, AVG(rate)
 FROM analytics.fact_exchange_rate_history
-WHERE base_currency = 'USD' AND target_currency = 'BRL'
-ORDER BY loaded_at DESC;
-
--- Ultimas execucoes do pipeline
-SELECT run_id, started_at, finished_at, status, records_loaded, error_message
-FROM analytics.pipeline_run_log
-ORDER BY run_id DESC
-LIMIT 20;
+GROUP BY target_currency;
 ```
 
-## Logging operacional
+## Logs do Pipeline
 
-Eventos registrados em `logs/pipeline.log`:
+O pipeline registra eventos operacionais no arquivo `logs/pipeline.log`, incluindo:
+
+- Rodou?
+- Deu erro?
+- Quantos dados foram carregados?
+
+Eventos importantes:
+
 - `API request successful`
 - `N currencies processed`
 - `Data loaded into database`
 
-## Automacao local (Windows Task Scheduler)
+## Agendamento Automatico
 
-Registrar tarefa diaria (exemplo: 06:00):
+O projeto suporta automacao por:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\register_task.ps1 -DailyAt "06:00"
-```
+- Windows Task Scheduler (`scripts/register_task.ps1`)
+- GitHub Actions (`.github/workflows/pipeline.yml`)
 
-Rodar sob demanda:
+## Objetivo do Projeto
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_pipeline.ps1
-```
+Este projeto foi desenvolvido como parte do meu aprendizado em Engenharia de Dados, com foco em:
 
-## Automacao no GitHub Actions
-
-Workflow em `.github/workflows/pipeline.yml` com:
-- `workflow_dispatch` (manual)
-- `schedule` diario as 09:00 UTC
-
-Secrets necessarios no repositorio:
-- `API_URL`
-- `CURRENCIES`
-
-## Alertas (opcional)
-
-Slack (webhook):
-- `SLACK_WEBHOOK_URL`
-
-E-mail (SMTP):
-- `EMAIL_SMTP_SERVER`
-- `EMAIL_SMTP_PORT`
-- `EMAIL_USERNAME`
-- `EMAIL_PASSWORD`
-- `EMAIL_TO`
-- `EMAIL_FROM`
+- construcao de pipelines de dados
+- ingestao via APIs
+- processamento e estruturacao de dados
+- persistencia historica para analise temporal
+- automacao e observabilidade operacional
