@@ -1,0 +1,33 @@
+﻿name: BRICS Currency Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    env:
+      API_URL: ${{ secrets.API_URL }}
+      CURRENCIES: ${{ secrets.CURRENCIES }}
+      PG_HOST: ${{ secrets.PG_HOST }}
+      PG_DATABASE: ${{ secrets.PG_DATABASE }}
+      PG_USER: ${{ secrets.PG_USER }}
+      PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+      PG_PORT: ${{ secrets.PG_PORT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: python src/pipeline.py

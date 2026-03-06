@@ -1,158 +1,54 @@
-# 🚀 BRICS Currency Data Pipeline
-------------------------------------------------
+﻿# BRICS Currency Data Pipeline
 
-## 📌 Overview
+Pipeline de dados que extrai, transforma e carrega cotacoes de moedas em PostgreSQL.
 
-Este projeto implementa um pipeline de dados modular para ingestão, transformação e persistência de taxas de câmbio obtidas via API externa.
+## Execucao manual
 
-A arquitetura foi projetada com foco em:
+1. Crie e ative um ambiente Python.
+2. Instale dependencias:
 
-+ Separação de responsabilidades (Ingest, Transform, Load)
+```bash
+pip install -r requirements.txt
+```
 
-+ Persistência auditável (Raw e Processed)
+3. Configure variaveis de ambiente copiando `.env.example` para `.env`.
+4. Execute:
 
-+ Idempotência via UPSERT no PostgreSQL
+```bash
+python src/pipeline.py
+```
 
-+ Validação estrutural do payload da API
+## Estrutura resumida
 
-+ Configuração via variáveis de ambiente
+Fluxo: API -> Raw JSON (`data/raw`) -> Transform -> PostgreSQL (UPSERT).
 
-Fluxo completo:
+A carga usa `INSERT ... ON CONFLICT` para manter idempotencia por `(base_currency, target_currency, reference_date)`.
 
-API → Raw JSON → Transform → Parquet → PostgreSQL
+## Automacao local (Windows Task Scheduler)
 
-## 🏗 Arquitetura
+Registrar tarefa diaria (exemplo: 06:00):
 
-    ┌────────────┐
-    │   FX API   │
-    └──────┬─────┘
-           │
-    (Ingest Layer)
-           │
-     Raw JSON Storage
-           |
-    (Transform Layer)
-           │
-    Parquet Storage
-           │
-      (Load Layer)
-           │
-    PostgreSQL - UPSERT
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\register_task.ps1 -DailyAt "06:00"
+```
 
-  
+Rodar sob demanda:
 
-🔹 Ingest
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_pipeline.ps1
+```
 
-+ Consome API de câmbio
+## Automacao no GitHub Actions
 
-+ Valida resposta
+Workflow em `.github/workflows/pipeline.yml` com:
+- `workflow_dispatch` (manual)
+- `schedule` diario as 09:00 UTC
 
-+ Persiste payload bruto em data/raw
-
-+ Loga quantidade de moedas recebidas
-
-🔹 Transform
-
-+ Lê o arquivo raw mais recente
-
-+ Valida estrutura esperada
-
-+ Usa base_code e time_last_update_utc
-
-+ Gera DataFrame estruturado
-
-+ Persiste em Parquet
-
-🔹 Load
-
-Conecta ao PostgreSQL
-
-Executa INSERT ... ON CONFLICT
-
-Garante idempotência e integridade via índice único
-
--------------------------------------------------------
-
-## 🧠 Modelagem
-
-Tabela analytics.fact_exchange_rate
-
-+ base_currency
-
-+ target_currency
-
-+ rate
-
-+ reference_date
-
-+ created_at
-
-Constraint:
-
-+ Índice único em (base_currency, target_currency, reference_date)
-
-+ Isso evita duplicidade e permite atualização segura de taxas.
-
---------------------
-
-## 🛠 Tecnologias Utilizadas
-
-+ Python
-
-+ Pandas
-
-+ PostgreSQL
-
-+ psycopg2
-
-+ Requests
-
-+ python-dotenv
-
-+ Logging nativo
-
-------------------------------
-
-## ▶ Como Executar
-
-Criar banco PostgreSQL
-
-Criar schema e tabela:
-
-```CREATE SCHEMA analytics;
-
-CREATE TABLE analytics.fact_exchange_rate (
-    id SERIAL PRIMARY KEY,
-    base_currency VARCHAR(10) NOT NULL,
-    target_currency VARCHAR(10) NOT NULL,
-    rate NUMERIC(18,8) NOT NULL,
-    reference_date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE UNIQUE INDEX ux_exchange_unique
-ON analytics.fact_exchange_rate (base_currency, target_currency, reference_date);
-````
-Criar .env baseado em .env.example
-
-Instalar dependências:
-
-```pip install -r requirements.txt```
-
-Executar:
-
-```python src/pipeline.py```
-
-------------------------------------------
-
-## 📊 Evoluções Futuras
-
-+ Containerização com Docker
-
-+ Orquestração com Airflow ou Prefect
-
-+ Testes unitários para camada de transformação
-
-+ Implementação de camadas Bronze/Silver/Gold
-
-+ Deploy em ambiente cloud
+Secrets necessarios no repositorio:
+- `API_URL`
+- `CURRENCIES`
+- `PG_HOST`
+- `PG_DATABASE`
+- `PG_USER`
+- `PG_PASSWORD`
+- `PG_PORT`
