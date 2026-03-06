@@ -33,7 +33,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run pipeline
-        run: python src/pipeline.py
+        run: python pipeline/run.py
 
       - name: Slack notification
         if: ${{ always() && env.SLACK_WEBHOOK_URL != '' }}

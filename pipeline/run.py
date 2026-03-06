@@ -1,10 +1,8 @@
-﻿import datetime
-import logging
+﻿import logging
 import os
 import time
-from pathlib import Path
 
-from ingest import fetch_exchange_rates, save_raw_data
+from extract import fetch_exchange_rates, save_raw_data
 from load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
 from transform import transform_latest_file
 
@@ -49,19 +47,6 @@ def run_pipeline():
 
         logging.exception("Falha na execucao do pipeline.")
         raise
-
-
-def save_processed_data(df):
-    processed_path = Path("data/processed")
-    processed_path.mkdir(parents=True, exist_ok=True)
-
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = processed_path / f"brics_rates_{timestamp}.parquet"
-
-    df.to_parquet(output_file, index=False)
-
-    logging.info(f"Arquivo parquet salvo em: {output_file}")
-    return output_file
 
 
 if __name__ == "__main__":

@@ -1,39 +1,37 @@
 ﻿# BRICS Currency Data Pipeline
 
-Projeto de Engenharia de Dados para coletar, processar e armazenar taxas de cambio de moedas dos paises do BRICS.
+Pipeline de Engenharia de Dados para coletar, processar e armazenar taxas de cambio das moedas do BRICS em formato analitico e historico.
 
-Este pipeline resolve um problema simples e real: transformar dados brutos de API em dados confiaveis, estruturados e historicos para analise.
+## Qual problema o projeto resolve?
 
-## O que este projeto resolve
+Projetos de cambio iniciantes costumam gerar apenas uma foto do momento. Este projeto gera serie temporal e observabilidade operacional:
+- coleta dados de API publica
+- processa e padroniza os dados
+- grava snapshot atual e historico
+- registra se o pipeline rodou, falhou e quantos registros carregou
 
-- Coleta automatizada de cotacoes via API publica.
-- Padronizacao e transformacao dos dados para formato analitico.
-- Persistencia em banco relacional com snapshot e historico temporal.
-- Observabilidade da execucao (rodou, falhou, quantos registros carregou).
+## Arquitetura
+
+Fluxo principal:
+
+`API -> Extraction -> Transformation -> Storage -> Analysis`
+
+Diagrama rapido:
+
+```text
+ExchangeRate API -> pipeline/extract.py -> pipeline/transform.py -> pipeline/load.py -> PostgreSQL
+```
 
 ## Tecnologias utilizadas
 
 - Python
 - Pandas
 - Requests
+- PostgreSQL
 - psycopg2
 - python-dotenv
-- PostgreSQL
 - Git / GitHub
 - GitHub Actions
-
-## Arquitetura
-
-Fluxo do pipeline:
-
-`API -> Extraction -> Transformation -> Storage`
-
-Etapas:
-
-1. Extrai cotacoes da API externa.
-2. Transforma o JSON em formato tabular.
-3. Estrutura os dados por moeda e data de referencia.
-4. Armazena para analise (snapshot + historico).
 
 ## Estrutura do projeto
 
@@ -42,28 +40,37 @@ brics-currency-data-pipeline/
   data/
     raw/
     processed/
-  logs/
+  pipeline/
+    extract.py
+    transform.py
+    load.py
+    run.py
+  notebooks/
+    analysis.ipynb
   scripts/
     run_pipeline.ps1
     register_task.ps1
   sql/
     001_create_exchange_tables.sql
-  src/
-    ingest.py
-    transform.py
-    load.py
-    pipeline.py
-  .github/workflows/
-    pipeline.yml
-  README.md
   requirements.txt
+  README.md
 ```
 
-## Modelo de dados
+## Etapas do pipeline
 
-- `analytics.fact_exchange_rate` (snapshot atual via UPSERT)
-- `analytics.fact_exchange_rate_history` (historico append-only)
-- `analytics.pipeline_run_log` (status, erro, quantidade carregada)
+1. Extract
+- busca cotacoes em API externa
+- salva payload bruto em `data/raw`
+
+2. Transform
+- normaliza JSON em estrutura tabular
+- filtra moedas configuradas
+- prepara dataset para carga
+
+3. Load
+- grava snapshot em `analytics.fact_exchange_rate`
+- grava historico append-only em `analytics.fact_exchange_rate_history`
+- registra execucao em `analytics.pipeline_run_log`
 
 ## Variaveis de ambiente
 
@@ -75,6 +82,15 @@ brics-currency-data-pipeline/
 - `PG_PASSWORD`
 - `PG_PORT`
 
+Opcional (alertas CI):
+- `SLACK_WEBHOOK_URL`
+- `EMAIL_SMTP_SERVER`
+- `EMAIL_SMTP_PORT`
+- `EMAIL_USERNAME`
+- `EMAIL_PASSWORD`
+- `EMAIL_TO`
+- `EMAIL_FROM`
+
 ## Exemplo de resultado
 
 | date | currency | value |
@@ -83,45 +99,51 @@ brics-currency-data-pipeline/
 | 2026-03-06 | CNY | 7.19 |
 | 2026-03-06 | INR | 83.11 |
 
-## Como rodar
-
-1. Clone o repositorio
+## Como executar
 
 ```bash
 git clone https://github.com/eduardo-wenzel/brics-currency-data-pipeline.git
 cd brics-currency-data-pipeline
-```
-
-2. Instale dependencias
-
-```bash
 pip install -r requirements.txt
+python pipeline/run.py
 ```
 
-3. Configure `.env` com base em `.env.example`
-
-4. Execute o pipeline
+Execucao por etapa:
 
 ```bash
-python src/pipeline.py
+python pipeline/extract.py
+python pipeline/transform.py
 ```
 
-## Automacao
+## Reprodutibilidade
 
-- Local: Windows Task Scheduler via `scripts/register_task.ps1`
-- CI/CD: GitHub Actions em `.github/workflows/pipeline.yml`
+Dependencias fixadas em `requirements.txt`.
+Camadas de dados separadas em `data/raw` e `data/processed`.
+Script SQL versionado em `sql/001_create_exchange_tables.sql`.
+
+## Historico de cambio (serie temporal)
+
+Tabela principal de historico:
+- `analytics.fact_exchange_rate_history`
+
+Consulta exemplo:
+
+```sql
+SELECT target_currency AS currency, AVG(rate)
+FROM analytics.fact_exchange_rate_history
+GROUP BY target_currency;
+```
 
 ## Observabilidade
 
-O pipeline registra eventos em `logs/pipeline.log`, incluindo:
+Arquivo de log: `logs/pipeline.log`
 
+Eventos chave:
 - `API request successful`
 - `N currencies processed`
 - `Data loaded into database`
 
-## Melhorias futuras
+## Automacao
 
-- Dashboard para analise temporal das moedas
-- Camada de testes automatizados
-- Containerizacao com Docker
-- Orquestracao com Airflow ou Prefect
+- Windows Task Scheduler: `scripts/register_task.ps1`
+- GitHub Actions: `.github/workflows/pipeline.yml`

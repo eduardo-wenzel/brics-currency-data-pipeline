@@ -136,3 +136,11 @@ def load_to_postgres(df, run_id: int | None = None):
         return len(records)
     finally:
         conn.close()
+
+
+def main():
+    raise SystemExit("Use pipeline/run.py para executar o fluxo completo.")
+
+
+if __name__ == "__main__":
+    main()

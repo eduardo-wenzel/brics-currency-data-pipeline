@@ -103,3 +103,12 @@ def save_processed_data(df):
 
     logging.info(f"Arquivo parquet salvo em: {output_file}")
     return output_file
+
+
+def main():
+    df = transform_latest_file()
+    save_processed_data(df)
+
+
+if __name__ == "__main__":
+    main()

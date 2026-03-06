@@ -16,5 +16,5 @@ if (-not (Test-Path ".env")) {
 }
 
 Write-Host "Executando pipeline em $ProjectRoot"
-python src/pipeline.py
+python pipeline/run.py
 exit $LASTEXITCODE
