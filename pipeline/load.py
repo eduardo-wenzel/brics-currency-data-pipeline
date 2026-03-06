@@ -45,6 +45,13 @@ def _ensure_tables(cursor):
             loaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS analytics.exchange_rates (
+            id BIGSERIAL PRIMARY KEY,
+            currency VARCHAR(10) NOT NULL,
+            rate NUMERIC(18,8) NOT NULL,
+            "timestamp" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS analytics.pipeline_run_log (
             run_id BIGSERIAL PRIMARY KEY,
             started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -117,6 +124,12 @@ def load_to_postgres(df, run_id: int | None = None):
                 VALUES (%s, %s, %s, %s, %s);
             """
 
+            exchange_rates_query = """
+                INSERT INTO analytics.exchange_rates
+                (currency, rate, "timestamp")
+                VALUES (%s, %s, CURRENT_TIMESTAMP);
+            """
+
             records = [
                 (
                     row["base_currency"],
@@ -131,6 +144,9 @@ def load_to_postgres(df, run_id: int | None = None):
 
             history_records = [(run_id, *record) for record in records]
             execute_batch(cursor, history_query, history_records)
+
+            exchange_rate_records = [(record[1], record[2]) for record in records]
+            execute_batch(cursor, exchange_rates_query, exchange_rate_records)
 
         conn.commit()
         return len(records)

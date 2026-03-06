@@ -22,6 +22,13 @@ CREATE TABLE IF NOT EXISTS analytics.fact_exchange_rate_history (
     loaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS analytics.exchange_rates (
+    id BIGSERIAL PRIMARY KEY,
+    currency VARCHAR(10) NOT NULL,
+    rate NUMERIC(18,8) NOT NULL,
+    "timestamp" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS analytics.pipeline_run_log (
     run_id BIGSERIAL PRIMARY KEY,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

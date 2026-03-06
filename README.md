@@ -70,6 +70,7 @@ brics-currency-data-pipeline/
 3. Load
 - grava snapshot em `analytics.fact_exchange_rate`
 - grava historico append-only em `analytics.fact_exchange_rate_history`
+- grava serie temporal simplificada em `analytics.exchange_rates`
 - registra execucao em `analytics.pipeline_run_log`
 
 ## Variaveis de ambiente
@@ -123,15 +124,15 @@ Script SQL versionado em `sql/001_create_exchange_tables.sql`.
 
 ## Historico de cambio (serie temporal)
 
-Tabela principal de historico:
-- `analytics.fact_exchange_rate_history`
+Tabela simplificada para analise temporal:
+- `analytics.exchange_rates` (`id`, `currency`, `rate`, `timestamp`)
 
 Consulta exemplo:
 
 ```sql
-SELECT target_currency AS currency, AVG(rate)
-FROM analytics.fact_exchange_rate_history
-GROUP BY target_currency;
+SELECT currency, AVG(rate)
+FROM analytics.exchange_rates
+GROUP BY currency;
 ```
 
 ## Observabilidade
