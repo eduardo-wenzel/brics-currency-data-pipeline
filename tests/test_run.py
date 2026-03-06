@@ -1,4 +1,4 @@
-﻿from pipeline.run import _should_skip_db_load
+from pipeline.run import _should_skip_db_load
 
 
 def test_should_skip_db_load_true(monkeypatch):

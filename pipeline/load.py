@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 
 import psycopg2
@@ -83,7 +83,9 @@ def create_pipeline_run() -> int:
         conn.close()
 
 
-def finalize_pipeline_run(run_id: int, status: str, records_loaded: int = 0, error_message: str | None = None):
+def finalize_pipeline_run(
+    run_id: int, status: str, records_loaded: int = 0, error_message: str | None = None
+):
     conn = _get_connection()
     try:
         with conn.cursor() as cursor:

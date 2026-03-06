@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import os
 from datetime import UTC, datetime
@@ -69,7 +69,7 @@ def _normalize_raw_payload(data: dict) -> dict:
 def transform_latest_file():
     file_path = get_latest_raw_file()
 
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         raw_data = json.load(f)
 
     normalized = _normalize_raw_payload(raw_data)

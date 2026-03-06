@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import os
 import time
 
@@ -46,7 +46,9 @@ def run_pipeline():
     except Exception as exc:
         if run_id is not None:
             try:
-                finalize_pipeline_run(run_id, status="FAILED", records_loaded=0, error_message=str(exc))
+                finalize_pipeline_run(
+                    run_id, status="FAILED", records_loaded=0, error_message=str(exc)
+                )
             except Exception:
                 logging.exception("Falha ao atualizar pipeline_run_log.")
 

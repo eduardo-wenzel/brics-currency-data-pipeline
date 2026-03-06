@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import os
 import time
@@ -16,7 +16,7 @@ log_dir.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     filename=log_dir / "pipeline.log",
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 BASE_URL = os.getenv("API_URL")
@@ -24,7 +24,7 @@ BASE_URL = os.getenv("API_URL")
 
 def fetch_exchange_rates():
     if not BASE_URL:
-        raise EnvironmentError("Variavel de ambiente API_URL nao configurada.")
+        raise OSError("Variavel de ambiente API_URL nao configurada.")
 
     start = time.time()
 
