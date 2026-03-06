@@ -12,6 +12,13 @@ jobs:
       API_URL: ${{ secrets.API_URL }}
       CURRENCIES: ${{ secrets.CURRENCIES }}
       SKIP_DB_LOAD: 'true'
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
+      EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
 
     steps:
       - name: Checkout
@@ -29,26 +36,26 @@ jobs:
         run: python src/pipeline.py
 
       - name: Slack notification
-        if: ${{ always() && secrets.SLACK_WEBHOOK_URL != '' }}
+        if: ${{ always() && env.SLACK_WEBHOOK_URL != '' }}
         run: |
           STATUS="${{ job.status }}"
           COLOR="#2eb886"
           if [ "$STATUS" != "success" ]; then COLOR="#d40e0e"; fi
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"attachments\":[{\"color\":\"$COLOR\",\"text\":\"BRICS pipeline: $STATUS\nRepo: ${{ github.repository }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}]}" \
-            "${{ secrets.SLACK_WEBHOOK_URL }}"
+            "$SLACK_WEBHOOK_URL"
 
       - name: Email notification
-        if: ${{ always() && secrets.EMAIL_SMTP_SERVER != '' }}
+        if: ${{ always() && env.EMAIL_SMTP_SERVER != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.EMAIL_SMTP_SERVER }}
-          server_port: ${{ secrets.EMAIL_SMTP_PORT }}
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          server_address: ${{ env.EMAIL_SMTP_SERVER }}
+          server_port: ${{ env.EMAIL_SMTP_PORT }}
+          username: ${{ env.EMAIL_USERNAME }}
+          password: ${{ env.EMAIL_PASSWORD }}
           subject: BRICS pipeline ${{ job.status }}
-          to: ${{ secrets.EMAIL_TO }}
-          from: ${{ secrets.EMAIL_FROM }}
+          to: ${{ env.EMAIL_TO }}
+          from: ${{ env.EMAIL_FROM }}
           body: |
             BRICS pipeline status: ${{ job.status }}
             Repository: ${{ github.repository }}
