@@ -1,42 +1,17 @@
 ﻿# BRICS Currency Data Pipeline
 
-Pipeline de dados desenvolvido para coletar, processar e analisar taxas de cambio das moedas dos paises do BRICS.
+Projeto de Engenharia de Dados para coletar, processar e armazenar taxas de cambio de moedas dos paises do BRICS.
 
-O projeto implementa um fluxo completo de engenharia de dados:
+Este pipeline resolve um problema simples e real: transformar dados brutos de API em dados confiaveis, estruturados e historicos para analise.
 
-API -> Ingestao -> Transformacao -> Armazenamento -> Analise
+## O que este projeto resolve
 
-Os dados sao coletados automaticamente de APIs publicas de cambio e organizados em um dataset estruturado para analise e visualizacao.
+- Coleta automatizada de cotacoes via API publica.
+- Padronizacao e transformacao dos dados para formato analitico.
+- Persistencia em banco relacional com snapshot e historico temporal.
+- Observabilidade da execucao (rodou, falhou, quantos registros carregou).
 
-Este projeto demonstra conceitos praticos de:
-- Data Ingestion
-- Data Transformation
-- Data Modeling
-- Data Pipelines
-- Automacao de coleta de dados
-
-## Arquitetura do Pipeline
-
-O pipeline segue as seguintes etapas:
-
-1. Coleta de dados
-- Consome dados de taxas de cambio via API.
-
-2. Processamento
-- Limpeza e padronizacao dos dados.
-- Conversao de tipos e tratamento de valores inconsistentes.
-
-3. Armazenamento
-- Dados estruturados sao armazenados para analises futuras.
-
-4. Analise
-- Os dados podem ser utilizados para analises economicas ou dashboards.
-
-Fluxo resumido:
-
-API -> Python -> Processamento -> Banco de Dados -> Analise
-
-## Tecnologias Utilizadas
+## Tecnologias utilizadas
 
 - Python
 - Pandas
@@ -47,35 +22,50 @@ API -> Python -> Processamento -> Banco de Dados -> Analise
 - Git / GitHub
 - GitHub Actions
 
-## Como executar o projeto
+## Arquitetura
 
-1. Clone o repositorio
+Fluxo do pipeline:
 
-```bash
-git clone https://github.com/eduardo-wenzel/brics-currency-data-pipeline.git
+`API -> Extraction -> Transformation -> Storage`
+
+Etapas:
+
+1. Extrai cotacoes da API externa.
+2. Transforma o JSON em formato tabular.
+3. Estrutura os dados por moeda e data de referencia.
+4. Armazena para analise (snapshot + historico).
+
+## Estrutura do projeto
+
+```text
+brics-currency-data-pipeline/
+  data/
+    raw/
+    processed/
+  logs/
+  scripts/
+    run_pipeline.ps1
+    register_task.ps1
+  sql/
+    001_create_exchange_tables.sql
+  src/
+    ingest.py
+    transform.py
+    load.py
+    pipeline.py
+  .github/workflows/
+    pipeline.yml
+  README.md
+  requirements.txt
 ```
 
-2. Entre na pasta do projeto
+## Modelo de dados
 
-```bash
-cd brics-currency-data-pipeline
-```
+- `analytics.fact_exchange_rate` (snapshot atual via UPSERT)
+- `analytics.fact_exchange_rate_history` (historico append-only)
+- `analytics.pipeline_run_log` (status, erro, quantidade carregada)
 
-3. Instale as dependencias
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Configure as variaveis de ambiente em `.env` (baseie-se em `.env.example`).
-
-5. Execute o pipeline
-
-```bash
-python src/pipeline.py
-```
-
-## Variaveis de Ambiente
+## Variaveis de ambiente
 
 - `API_URL`
 - `CURRENCIES`
@@ -85,49 +75,53 @@ python src/pipeline.py
 - `PG_PASSWORD`
 - `PG_PORT`
 
-## Persistencia e Historico
+## Exemplo de resultado
 
-O projeto grava dados em:
+| date | currency | value |
+|---|---|---:|
+| 2026-03-06 | BRL | 5.02 |
+| 2026-03-06 | CNY | 7.19 |
+| 2026-03-06 | INR | 83.11 |
 
-- `analytics.fact_exchange_rate`: snapshot atual (UPSERT)
-- `analytics.fact_exchange_rate_history`: historico temporal (append-only)
-- `analytics.pipeline_run_log`: status de execucao, erro e quantidade carregada
+## Como rodar
 
-Exemplo de analise historica:
+1. Clone o repositorio
 
-```sql
-SELECT target_currency AS currency, AVG(rate)
-FROM analytics.fact_exchange_rate_history
-GROUP BY target_currency;
+```bash
+git clone https://github.com/eduardo-wenzel/brics-currency-data-pipeline.git
+cd brics-currency-data-pipeline
 ```
 
-## Logs do Pipeline
+2. Instale dependencias
 
-O pipeline registra eventos operacionais no arquivo `logs/pipeline.log`, incluindo:
+```bash
+pip install -r requirements.txt
+```
 
-- Rodou?
-- Deu erro?
-- Quantos dados foram carregados?
+3. Configure `.env` com base em `.env.example`
 
-Eventos importantes:
+4. Execute o pipeline
+
+```bash
+python src/pipeline.py
+```
+
+## Automacao
+
+- Local: Windows Task Scheduler via `scripts/register_task.ps1`
+- CI/CD: GitHub Actions em `.github/workflows/pipeline.yml`
+
+## Observabilidade
+
+O pipeline registra eventos em `logs/pipeline.log`, incluindo:
 
 - `API request successful`
 - `N currencies processed`
 - `Data loaded into database`
 
-## Agendamento Automatico
+## Melhorias futuras
 
-O projeto suporta automacao por:
-
-- Windows Task Scheduler (`scripts/register_task.ps1`)
-- GitHub Actions (`.github/workflows/pipeline.yml`)
-
-## Objetivo do Projeto
-
-Este projeto foi desenvolvido como parte do meu aprendizado em Engenharia de Dados, com foco em:
-
-- construcao de pipelines de dados
-- ingestao via APIs
-- processamento e estruturacao de dados
-- persistencia historica para analise temporal
-- automacao e observabilidade operacional
+- Dashboard para analise temporal das moedas
+- Camada de testes automatizados
+- Containerizacao com Docker
+- Orquestracao com Airflow ou Prefect
