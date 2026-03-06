@@ -47,8 +47,16 @@ Workflow em `.github/workflows/pipeline.yml` com:
 Secrets necessarios no repositorio:
 - `API_URL`
 - `CURRENCIES`
-- `PG_HOST`
-- `PG_DATABASE`
-- `PG_USER`
-- `PG_PASSWORD`
-- `PG_PORT`
+
+## Alertas (opcional)
+
+Slack (webhook):
+- `SLACK_WEBHOOK_URL`
+
+E-mail (SMTP):
+- `EMAIL_SMTP_SERVER`
+- `EMAIL_SMTP_PORT`
+- `EMAIL_USERNAME`
+- `EMAIL_PASSWORD`
+- `EMAIL_TO`
+- `EMAIL_FROM`
