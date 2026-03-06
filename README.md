@@ -18,11 +18,40 @@ pip install -r requirements.txt
 python src/pipeline.py
 ```
 
-## Estrutura resumida
+## Persistencia de dados
 
-Fluxo: API -> Raw JSON (`data/raw`) -> Transform -> PostgreSQL (UPSERT).
+O pipeline grava em duas tabelas de fatos:
+- `analytics.fact_exchange_rate`: snapshot atual por `(base_currency, target_currency, reference_date)` via UPSERT.
+- `analytics.fact_exchange_rate_history`: historico append-only, uma nova linha por moeda a cada execucao.
 
-A carga usa `INSERT ... ON CONFLICT` para manter idempotencia por `(base_currency, target_currency, reference_date)`.
+Log de execucao:
+- `analytics.pipeline_run_log`: status (`RUNNING`, `SUCCESS`, `FAILED`), quantidade carregada e mensagem de erro.
+
+Script SQL de criacao:
+- `sql/001_create_exchange_tables.sql`
+
+Consultas uteis:
+
+```sql
+-- Serie temporal por moeda
+SELECT reference_date, loaded_at, rate
+FROM analytics.fact_exchange_rate_history
+WHERE base_currency = 'USD' AND target_currency = 'BRL'
+ORDER BY loaded_at DESC;
+
+-- Ultimas execucoes do pipeline
+SELECT run_id, started_at, finished_at, status, records_loaded, error_message
+FROM analytics.pipeline_run_log
+ORDER BY run_id DESC
+LIMIT 20;
+```
+
+## Logging operacional
+
+Eventos registrados em `logs/pipeline.log`:
+- `API request successful`
+- `N currencies processed`
+- `Data loaded into database`
 
 ## Automacao local (Windows Task Scheduler)
 
