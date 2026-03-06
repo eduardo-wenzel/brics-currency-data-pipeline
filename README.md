@@ -52,7 +52,11 @@ brics-currency-data-pipeline/
     register_task.ps1
   sql/
     001_create_exchange_tables.sql
+  tests/
   requirements.txt
+  requirements-dev.txt
+  pyproject.toml
+  .pre-commit-config.yaml
   README.md
 ```
 
@@ -114,6 +118,34 @@ Execucao por etapa:
 ```bash
 python pipeline/extract.py
 python pipeline/transform.py
+```
+
+## Qualidade de codigo e testes
+
+Instalar dependencias de desenvolvimento:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Rodar testes:
+
+```bash
+pytest
+```
+
+Rodar lint/format:
+
+```bash
+ruff check .
+black --check .
+```
+
+Ativar hooks locais:
+
+```bash
+pre-commit install
+pre-commit run --all-files
 ```
 
 ## Reprodutibilidade

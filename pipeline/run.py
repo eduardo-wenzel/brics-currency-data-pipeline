@@ -2,9 +2,14 @@
 import os
 import time
 
-from extract import fetch_exchange_rates, save_raw_data
-from load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
-from transform import transform_latest_file
+try:
+    from pipeline.extract import fetch_exchange_rates, save_raw_data
+    from pipeline.load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
+    from pipeline.transform import transform_latest_file
+except ImportError:
+    from extract import fetch_exchange_rates, save_raw_data
+    from load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
+    from transform import transform_latest_file
 
 
 def _should_skip_db_load() -> bool:

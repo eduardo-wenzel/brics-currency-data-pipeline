@@ -1,0 +1,4 @@
+﻿pytest==8.4.2
+ruff==0.13.2
+black==25.1.0
+pre-commit==4.3.0

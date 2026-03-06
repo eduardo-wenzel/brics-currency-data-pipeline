@@ -21,11 +21,11 @@ logging.basicConfig(
 
 BASE_URL = os.getenv("API_URL")
 
-if not BASE_URL:
-    raise EnvironmentError("Variavel de ambiente API_URL nao configurada.")
-
 
 def fetch_exchange_rates():
+    if not BASE_URL:
+        raise EnvironmentError("Variavel de ambiente API_URL nao configurada.")
+
     start = time.time()
 
     response = requests.get(BASE_URL, timeout=15)
