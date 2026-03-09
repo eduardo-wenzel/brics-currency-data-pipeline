@@ -1,4 +1,4 @@
-﻿# BRICS Currency Data Pipeline
+﻿# 🪙 BRICS Currency Data Pipeline
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192.svg?logo=postgresql)
@@ -19,7 +19,7 @@ Projetos de cambio iniciantes costumam gerar apenas um snapshot momentaneo. Este
 - Grava snapshot atual idempotente (UPSERT) e historico append-only.
 - Registra execucao, sucesso/falha e volume de dados carregados.
 
-## Arquitetura
+## 🧱 Arquitetura
 
 Fluxo principal:
 
@@ -38,7 +38,7 @@ graph TD
     E --> I[pipeline_run_log]
 ```
 
-## Modelo de dados (PostgreSQL)
+## 📀 Modelo de dados (PostgreSQL)
 
 Schema: `analytics`
 
@@ -47,7 +47,7 @@ Schema: `analytics`
 - `exchange_rates`: serie temporal simplificada para analise rapida.
 - `pipeline_run_log`: auditoria operacional (inicio, fim, status, erro, registros carregados).
 
-## Como executar com Docker (recomendado)
+## 🚀 Como executar com Docker (recomendado)
 
 Prerequisitos:
 
@@ -106,7 +106,7 @@ Acesso PgAdmin: `http://localhost:5050`
 ./scripts/docker.ps1 down
 ```
 
-## Como executar localmente (desenvolvimento)
+## 💻 Como executar localmente (desenvolvimento)
 
 1. Crie/ative um ambiente virtual.
 2. Instale dependencias:
@@ -129,7 +129,7 @@ python pipeline/extract.py
 python pipeline/transform.py
 ```
 
-## Qualidade de codigo e testes
+## 🧪 Qualidade de codigo e testes
 
 ```bash
 pytest
@@ -165,12 +165,12 @@ Opcionais para alertas CI:
 - `EMAIL_TO`
 - `EMAIL_FROM`
 
-## Automacao e CI/CD
+## ⚙️ Automacao e CI/CD
 
 - Local: `scripts/register_task.ps1` (Windows Task Scheduler).
 - GitHub Actions: `.github/workflows/pipeline.yml` para execucao automatizada e checks de qualidade.
 
-## Roadmap
+## 🗺️ Roadmap
 
 - [ ] Migrar camadas de dados locais para S3 (Bronze/Silver).
 - [ ] Adotar orquestrador dedicado (Airflow ou Dagster).
