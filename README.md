@@ -180,3 +180,49 @@ Eventos chave:
 
 - Windows Task Scheduler: `scripts/register_task.ps1`
 - GitHub Actions: `.github/workflows/pipeline.yml`
+
+## Docker (app + PostgreSQL)
+
+Subir banco e dependencias:
+
+```powershell
+./scripts/docker.ps1 up
+```
+
+Executar pipeline no container:
+
+```powershell
+./scripts/docker.ps1 run
+```
+
+Ver logs do app:
+
+```powershell
+./scripts/docker.ps1 logs
+```
+
+Ver status dos servicos:
+
+```powershell
+./scripts/docker.ps1 ps
+```
+
+Parar ambiente:
+
+```powershell
+./scripts/docker.ps1 down
+```
+
+### PgAdmin (opcional)
+
+Subir PgAdmin em profile separado:
+
+```powershell
+./scripts/docker.ps1 pgadmin
+```
+
+Acesso: `http://localhost:5050`
+
+Credenciais padrao (podem ser sobrescritas no `.env`):
+- `PGADMIN_DEFAULT_EMAIL=admin@bricspipeline.dev`
+- `PGADMIN_DEFAULT_PASSWORD=admin123`
