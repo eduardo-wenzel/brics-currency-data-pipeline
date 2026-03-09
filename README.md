@@ -6,7 +6,9 @@
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 ![CI Status](https://github.com/eduardo-wenzel/brics-currency-data-pipeline/actions/workflows/pipeline.yml/badge.svg)
 
-Pipeline de Engenharia de Dados para extrair, transformar e armazenar taxas de cambio das moedas do BRICS em uma base analitica e historica no PostgreSQL.
+Um pipeline de dados em estilo de producao que coleta taxas de cambio das moedas do BRICS,
+processa os dados com Python e Pandas, e armazena os resultados no PostgreSQL.
+O projeto inclui testes automatizados, workflows de CI e conteinerizacao com Docker.
 
 ## Qual problema este projeto resolve?
 
@@ -175,3 +177,5 @@ Opcionais para alertas CI:
 - [ ] Adicionar testes de qualidade de dados (dbt/Great Expectations).
 - [ ] Expor dashboards em ferramenta de BI (Metabase/Superset).
 - [ ] Provisionar infraestrutura com Terraform.
+
+
