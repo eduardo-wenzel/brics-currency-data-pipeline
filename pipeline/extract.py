@@ -1,12 +1,15 @@
-import json
 import logging
 import os
 import time
-from datetime import datetime
 from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+
+try:
+    from pipeline.storage import save_raw_data as persist_raw_data
+except ImportError:
+    from storage import save_raw_data as persist_raw_data
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
@@ -42,15 +45,7 @@ def fetch_exchange_rates():
 
 
 def save_raw_data(data: dict):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    raw_path = Path("data/raw")
-    raw_path.mkdir(parents=True, exist_ok=True)
-
-    file_path = raw_path / f"brics_rates_{timestamp}.json"
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
+    file_path = persist_raw_data(data)
     logging.info(f"Arquivo raw salvo em: {file_path}")
     return file_path
 

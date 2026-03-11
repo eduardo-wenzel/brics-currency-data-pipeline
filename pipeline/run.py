@@ -5,11 +5,11 @@ import time
 try:
     from pipeline.extract import fetch_exchange_rates, save_raw_data
     from pipeline.load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
-    from pipeline.transform import transform_latest_file
+    from pipeline.transform import save_processed_data, transform_latest_file
 except ImportError:
     from extract import fetch_exchange_rates, save_raw_data
     from load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
-    from transform import transform_latest_file
+    from transform import save_processed_data, transform_latest_file
 
 
 def _should_skip_db_load() -> bool:
@@ -28,9 +28,11 @@ def run_pipeline():
 
         raw_file = save_raw_data(data)
         df = transform_latest_file()
+        processed_file = save_processed_data(df)
         processed_count = len(df)
         logging.info(f"{processed_count} currencies processed")
         logging.info(f"Raw salvo em: {raw_file}")
+        logging.info(f"Silver salvo em: {processed_file}")
 
         if _should_skip_db_load():
             logging.info("SKIP_DB_LOAD=true: carga no PostgreSQL ignorada.")

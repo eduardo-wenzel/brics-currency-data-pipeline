@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from datetime import UTC, datetime
@@ -7,19 +6,26 @@ from pathlib import Path
 import pandas as pd
 from dotenv import load_dotenv
 
+try:
+    from pipeline.storage import (
+        get_latest_raw_file as get_latest_raw_file_from_storage,
+        read_raw_data,
+        save_processed_data as persist_processed_data,
+    )
+except ImportError:
+    from storage import (
+        get_latest_raw_file as get_latest_raw_file_from_storage,
+        read_raw_data,
+        save_processed_data as persist_processed_data,
+    )
+
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
 CURRENCIES = os.getenv("CURRENCIES", "")
 
 
 def get_latest_raw_file():
-    raw_path = Path("data/raw")
-    files = list(raw_path.glob("*.json"))
-
-    if not files:
-        raise FileNotFoundError("Nenhum arquivo raw encontrado.")
-
-    latest_file = max(files, key=lambda f: f.stat().st_mtime)
+    latest_file = get_latest_raw_file_from_storage()
     logging.info(f"Arquivo raw mais recente: {latest_file}")
     return latest_file
 
@@ -68,9 +74,7 @@ def _normalize_raw_payload(data: dict) -> dict:
 
 def transform_latest_file():
     file_path = get_latest_raw_file()
-
-    with open(file_path, encoding="utf-8") as f:
-        raw_data = json.load(f)
+    raw_data = read_raw_data(file_path)
 
     normalized = _normalize_raw_payload(raw_data)
 
@@ -93,14 +97,7 @@ def transform_latest_file():
 
 
 def save_processed_data(df):
-    processed_path = Path("data/processed")
-    processed_path.mkdir(parents=True, exist_ok=True)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = processed_path / f"brics_rates_{timestamp}.parquet"
-
-    df.to_parquet(output_file, index=False)
-
+    output_file = persist_processed_data(df)
     logging.info(f"Arquivo parquet salvo em: {output_file}")
     return output_file
 
