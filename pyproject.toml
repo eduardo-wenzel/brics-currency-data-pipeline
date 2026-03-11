@@ -5,7 +5,12 @@ target-version = ["py311"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["notebooks/*.ipynb"]
+extend-exclude = [
+    ".conda",
+    ".pytest_cache",
+    ".ruff_cache",
+    "notebooks/*.ipynb",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
@@ -15,3 +20,4 @@ ignore = ["E501"]
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
+
