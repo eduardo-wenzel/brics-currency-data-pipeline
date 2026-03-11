@@ -1,4 +1,4 @@
-# BRICS Currency Data Pipeline
+﻿# BRICS Currency Data Pipeline
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192.svg?logo=postgresql)
@@ -40,6 +40,28 @@ graph TD
     F --> I[exchange_rates]
     F --> J[pipeline_run_log]
 ```
+
+## Visualizacao do Projeto
+
+### Infraestrutura conteinerizada
+![Docker Setup](docs/images/docker_setup.png)
+
+Ambiente de desenvolvimento totalmente conteinerizado, garantindo paridade entre desenvolvimento e producao.
+
+### Observabilidade e logs
+![Pipeline Logs](docs/images/pipeline_logs.png)
+
+Monitoramento detalhado de execucao e rastreabilidade de dados.
+
+### Data Lake em camadas Bronze e Silver
+![Data Lake S3](docs/images/s3_layers.png)
+
+Implementacao de Data Lake com separacao de camadas Bronze (Raw) e Silver (Processed/Parquet).
+
+### Consumo analitico em SQL
+![SQL Analysis](docs/images/sql_results.png)
+
+Exemplo de consumo analitico utilizando Window Functions para calculo de tendencias cambiais.
 
 ## Modelo de dados (PostgreSQL)
 
