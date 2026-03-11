@@ -76,26 +76,39 @@ No Windows PowerShell, se necessario:
 Copy-Item .env.example .env
 ```
 
-3. Suba o banco:
+3. Suba o banco para o modo com PostgreSQL:
 
 ```powershell
 ./scripts/docker.ps1 up
 ```
 
-4. Execute o pipeline no container:
+4. Execute o pipeline no container com PostgreSQL:
 
 ```powershell
 ./scripts/docker.ps1 run
 ```
 
-5. Veja logs e status:
+5. Execute o pipeline no modo S3-only, sem depender do PostgreSQL:
+
+```powershell
+./scripts/docker.ps1 run-s3
+```
+
+Se quiser manter o container S3-only em execucao:
+
+```powershell
+./scripts/docker.ps1 up-s3
+./scripts/docker.ps1 logs-s3
+```
+
+6. Veja logs e status do modo com PostgreSQL:
 
 ```powershell
 ./scripts/docker.ps1 logs
 ./scripts/docker.ps1 ps
 ```
 
-6. Suba o PgAdmin (opcional):
+7. Suba o PgAdmin (opcional):
 
 ```powershell
 ./scripts/docker.ps1 pgadmin
@@ -103,7 +116,7 @@ Copy-Item .env.example .env
 
 Acesso PgAdmin: `http://localhost:5050`
 
-7. Pare o ambiente:
+8. Pare o ambiente:
 
 ```powershell
 ./scripts/docker.ps1 down
