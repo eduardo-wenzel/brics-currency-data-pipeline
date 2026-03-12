@@ -84,12 +84,14 @@ def _raise_s3_error(exc: Exception, action: str, key: str | None = None):
 
     if error_code == "NoSuchBucket":
         raise RuntimeError(
-            f"Falha ao {action} no S3:{target}. O bucket nao existe na conta atual ou nao esta na regiao '{region}'."
+            f"Falha ao {action} no S3:{target}. O bucket nao existe na conta atual ou nao esta na regiao "
+            f"'{region}'."
         ) from exc
 
     if error_code in {"AccessDenied", "AllAccessDisabled"}:
         raise RuntimeError(
-            f"Falha ao {action} no S3:{target}. A conta atual nao tem permissao para acessar esse bucket."
+            f"Falha ao {action} no S3:{target}. A conta atual nao tem permissao para acessar "
+            f"esse bucket."
         ) from exc
 
     if error_code == "NoSuchKey":
@@ -97,7 +99,9 @@ def _raise_s3_error(exc: Exception, action: str, key: str | None = None):
             f"Falha ao {action} no S3:{target}. O objeto informado nao foi encontrado."
         ) from exc
 
-    raise RuntimeError(f"Falha ao {action} no S3:{target}. Erro AWS: {error_code or type(exc).__name__}.") from exc
+    raise RuntimeError(
+        f"Falha ao {action} no S3:{target}. Erro AWS: {error_code or type(exc).__name__}."
+    ) from exc
 
 
 def _put_object(*, key: str, body: bytes, content_type: str):
@@ -161,6 +165,10 @@ def get_latest_raw_file():
 def read_raw_data(file_ref) -> dict:
     if isinstance(file_ref, str) and file_ref.startswith("s3://"):
         file_ref = file_ref.removeprefix(f"s3://{_s3_bucket()}/")
+
+    if isinstance(file_ref, Path):
+        with file_ref.open(encoding="utf-8") as file:
+            return json.load(file)
 
     if storage_backend() == "s3" or isinstance(file_ref, str):
         return json.loads(_get_object_bytes(file_ref).decode("utf-8"))

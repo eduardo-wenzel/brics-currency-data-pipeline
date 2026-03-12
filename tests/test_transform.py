@@ -3,8 +3,7 @@ from io import BytesIO
 
 import pandas as pd
 
-from pipeline import storage
-from pipeline import transform
+from pipeline import storage, transform
 
 
 class DummyBody:
@@ -24,7 +23,7 @@ class DummyS3Client:
 
     def list_objects_v2(self, Bucket, Prefix):
         contents = []
-        for index, ((bucket, key), value) in enumerate(self.objects.items()):
+        for index, ((bucket, key), _value) in enumerate(self.objects.items()):
             if bucket == Bucket and key.startswith(Prefix):
                 contents.append({"Key": key, "LastModified": index})
         return {"Contents": contents}
@@ -64,6 +63,7 @@ def test_transform_latest_file_returns_dataframe(tmp_path, monkeypatch):
     )
 
     monkeypatch.setattr(transform, "CURRENCIES", "")
+    monkeypatch.setenv("DATA_LAKE_BACKEND", "local")
     monkeypatch.setattr(transform, "get_latest_raw_file", lambda: raw_file)
 
     df = transform.transform_latest_file()

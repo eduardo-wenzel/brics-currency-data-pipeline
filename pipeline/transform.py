@@ -7,17 +7,13 @@ import pandas as pd
 from dotenv import load_dotenv
 
 try:
-    from pipeline.storage import (
-        get_latest_raw_file as get_latest_raw_file_from_storage,
-        read_raw_data,
-        save_processed_data as persist_processed_data,
-    )
+    from pipeline import storage as storage_module
 except ImportError:
-    from storage import (
-        get_latest_raw_file as get_latest_raw_file_from_storage,
-        read_raw_data,
-        save_processed_data as persist_processed_data,
-    )
+    import storage as storage_module
+
+get_latest_raw_file_from_storage = storage_module.get_latest_raw_file
+read_raw_data = storage_module.read_raw_data
+persist_processed_data = storage_module.save_processed_data
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 

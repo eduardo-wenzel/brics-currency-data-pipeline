@@ -10,8 +10,8 @@ def main():
     try:
         import boto3
         from botocore.exceptions import ClientError
-    except ModuleNotFoundError:
-        raise SystemExit("boto3 nao instalado no ambiente atual.")
+    except ModuleNotFoundError as exc:
+        raise SystemExit("boto3 nao instalado no ambiente atual.") from exc
 
     bucket = os.getenv("AWS_S3_BUCKET", "").strip()
     region = (os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION") or "").strip()
@@ -27,7 +27,9 @@ def main():
     try:
         response = client.head_bucket(Bucket=bucket)
         print("HeadBucket: OK")
-        bucket_region = response.get("ResponseMetadata", {}).get("HTTPHeaders", {}).get("x-amz-bucket-region")
+        bucket_region = (
+            response.get("ResponseMetadata", {}).get("HTTPHeaders", {}).get("x-amz-bucket-region")
+        )
         if bucket_region:
             print(f"Regiao retornada pela AWS: {bucket_region}")
     except ClientError as exc:
@@ -39,7 +41,7 @@ def main():
             print(f"Regiao retornada pela AWS: {bucket_region}")
         raise SystemExit(
             "O bucket nao foi encontrado para as credenciais/regiao atuais, ou o nome do bucket esta incorreto."
-        )
+        ) from exc
 
 
 if __name__ == "__main__":

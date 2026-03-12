@@ -1,7 +1,6 @@
 import json
 
-from pipeline import extract
-from pipeline import storage
+from pipeline import extract, storage
 
 
 class DummyBody:
@@ -21,7 +20,7 @@ class DummyS3Client:
 
     def list_objects_v2(self, Bucket, Prefix):
         contents = []
-        for index, ((bucket, key), value) in enumerate(self.objects.items()):
+        for index, ((bucket, key), _value) in enumerate(self.objects.items()):
             if bucket == Bucket and key.startswith(Prefix):
                 contents.append({"Key": key, "LastModified": index})
         return {"Contents": contents}
