@@ -1,4 +1,4 @@
-﻿# BRICS Currency Data Pipeline
+# BRICS Currency Data Pipeline
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192.svg?logo=postgresql)
@@ -10,6 +10,7 @@ Um pipeline de dados em estilo de producao que coleta taxas de cambio das moedas
 processa os dados com Python e Pandas, e armazena os resultados no PostgreSQL.
 Agora o projeto tambem suporta data lake em AWS S3 para persistir as camadas Bronze e Silver.
 O projeto inclui testes automatizados, workflows de CI e conteinerizacao com Docker.
+Tambem inclui uma DAG opcional do Apache Airflow para orquestrar o fluxo fim a fim.
 
 ## Qual problema este projeto resolve?
 
@@ -83,7 +84,7 @@ Prerequisitos:
 
 ```bash
 git clone https://github.com/eduardo-wenzel/brics-currency-data-pipeline.git
-cd brics-currency-data-pipeline
+cd brics-currency-pipeline
 ```
 
 2. Configure ambiente:
@@ -144,6 +145,50 @@ Acesso PgAdmin: `http://localhost:5050`
 ./scripts/docker.ps1 down
 ```
 
+## Orquestracao com Airflow
+
+O projeto agora inclui a DAG `brics_currency_pipeline`, que reaproveita as mesmas funcoes de extract, transform e load do pipeline Python. O fluxo no Airflow fica:
+
+`extract_task -> transform_task -> load_task`
+
+Para subir a stack do Airflow com Docker:
+
+```powershell
+./scripts/docker.ps1 up-airflow
+```
+
+Interface web: `http://localhost:8080`
+
+Credenciais padrao:
+
+- usuario: `airflow`
+- senha: `airflow`
+
+Logs do orquestrador:
+
+```powershell
+./scripts/docker.ps1 logs-airflow
+```
+
+Configuracoes relacionadas ao Airflow no `.env`:
+
+- `AIRFLOW_SCHEDULE`: cron da DAG (padrao: a cada 6 horas)
+- `AIRFLOW_ADMIN_USERNAME`
+- `AIRFLOW_ADMIN_PASSWORD`
+- `AIRFLOW_ADMIN_EMAIL`
+- `AIRFLOW_SECRET_KEY`
+- `AIRFLOW_FERNET_KEY`
+
+Instalacao local do Airflow fora do Docker:
+
+```bash
+pip install -r requirements-airflow.txt
+```
+
+Observacao: a DAG usa o mesmo PostgreSQL do projeto para metadata do Airflow e para as tabelas analiticas, mas os objetos permanecem separados logicamente.
+
+Para evitar deadlocks na carga relacional quando houver disparos manuais e agendados ao mesmo tempo, a DAG foi configurada com `max_active_runs=1`, garantindo apenas uma execucao ativa por vez.
+
 ## Como executar localmente (desenvolvimento)
 
 1. Crie/ative um ambiente virtual.
@@ -157,6 +202,7 @@ pip install -r requirements-dev.txt
 3. Execute o pipeline:
 
 ```bash
+python scripts/apply_migrations.py
 python pipeline/run.py
 ```
 
@@ -166,6 +212,8 @@ Execucao por etapa:
 python pipeline/extract.py
 python pipeline/transform.py
 ```
+
+O script `python scripts/apply_migrations.py` aplica os arquivos SQL em `sql/` e registra as versoes em `public.schema_migrations`.
 
 ## Configurando o data lake no S3
 
@@ -227,6 +275,15 @@ Opcionais para PgAdmin (Docker):
 - `PGADMIN_DEFAULT_EMAIL`
 - `PGADMIN_DEFAULT_PASSWORD`
 
+Opcionais para Airflow:
+
+- `AIRFLOW_SCHEDULE`
+- `AIRFLOW_ADMIN_USERNAME`
+- `AIRFLOW_ADMIN_PASSWORD`
+- `AIRFLOW_ADMIN_EMAIL`
+- `AIRFLOW_SECRET_KEY`
+- `AIRFLOW_FERNET_KEY`
+
 Opcionais para alertas CI:
 
 - `SLACK_WEBHOOK_URL`
@@ -241,11 +298,13 @@ Opcionais para alertas CI:
 
 - Local: `scripts/register_task.ps1` (Windows Task Scheduler).
 - GitHub Actions: `.github/workflows/pipeline.yml` para execucao automatizada e checks de qualidade.
+- Airflow: `dags/brics_currency_pipeline_dag.py` para orquestracao operacional do pipeline.
 
 ## Roadmap
 
 - [x] Migrar camadas de dados locais para S3 (Bronze/Silver).
-- [ ] Adotar orquestrador dedicado (Airflow ou Dagster).
+- [x] Adotar orquestrador dedicado com Airflow.
 - [ ] Adicionar testes de qualidade de dados (dbt/Great Expectations).
 - [ ] Expor dashboards em ferramenta de BI (Metabase/Superset).
 - [ ] Provisionar infraestrutura com Terraform.
+

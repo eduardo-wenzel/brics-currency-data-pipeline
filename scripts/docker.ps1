@@ -1,6 +1,6 @@
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('build', 'up', 'up-s3', 'down', 'logs', 'logs-s3', 'run', 'run-s3', 'ps', 'pgadmin')]
+    [ValidateSet('build', 'up', 'up-s3', 'up-airflow', 'down', 'logs', 'logs-s3', 'logs-airflow', 'run', 'run-s3', 'ps', 'pgadmin')]
     [string]$Action = 'up'
 )
 
@@ -19,8 +19,12 @@ switch ($Action) {
         docker compose --profile s3 up --build -d app-s3
         break
     }
+    'up-airflow' {
+        docker compose --profile airflow up --build -d postgres airflow-init airflow-webserver airflow-scheduler
+        break
+    }
     'down' {
-        docker compose --profile s3 --profile admin down
+        docker compose --profile s3 --profile admin --profile airflow down
         break
     }
     'logs' {
@@ -29,6 +33,10 @@ switch ($Action) {
     }
     'logs-s3' {
         docker compose --profile s3 logs -f app-s3
+        break
+    }
+    'logs-airflow' {
+        docker compose --profile airflow logs -f airflow-webserver airflow-scheduler
         break
     }
     'run' {
@@ -40,7 +48,7 @@ switch ($Action) {
         break
     }
     'ps' {
-        docker compose --profile s3 --profile admin ps
+        docker compose --profile s3 --profile admin --profile airflow ps
         break
     }
     'pgadmin' {

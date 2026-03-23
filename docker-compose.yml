@@ -42,6 +42,92 @@ services:
       retries: 5
     command: ["python", "pipeline/run.py"]
 
+  airflow-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    profiles: ["airflow"]
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${PG_USER:-postgres}:${PG_PASSWORD:-postgres}@postgres:5432/${PG_DATABASE:-brics_pipeline}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-brics-airflow-secret}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PYTHONPATH: /opt/airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - bash
+      - -c
+      - >
+        airflow db migrate &&
+        airflow users create
+        --username ${AIRFLOW_ADMIN_USERNAME:-airflow}
+        --firstname Airflow
+        --lastname Admin
+        --role Admin
+        --email ${AIRFLOW_ADMIN_EMAIL:-airflow@example.com}
+        --password ${AIRFLOW_ADMIN_PASSWORD:-airflow}
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    profiles: ["airflow"]
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${PG_USER:-postgres}:${PG_PASSWORD:-postgres}@postgres:5432/${PG_DATABASE:-brics_pipeline}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-brics-airflow-secret}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PYTHONPATH: /opt/airflow
+    volumes:
+      - ./logs/airflow:/opt/airflow/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    command: ["airflow", "webserver"]
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    profiles: ["airflow"]
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${PG_USER:-postgres}:${PG_PASSWORD:-postgres}@postgres:5432/${PG_DATABASE:-brics_pipeline}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-brics-airflow-secret}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PYTHONPATH: /opt/airflow
+    volumes:
+      - ./logs/airflow:/opt/airflow/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    command: ["airflow", "scheduler"]
+
   app-s3:
     build:
       context: .
