@@ -17,6 +17,7 @@ def _get_connection():
         port=os.getenv("PG_PORT", 5432),
     )
 
+
 def create_pipeline_run() -> int:
     conn = _get_connection()
     try:

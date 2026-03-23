@@ -11,4 +11,4 @@ def test_airflow_dag_file_exists():
     assert "transform_task" in contents
     assert "load_task" in contents
     assert "apply_migrations()" in contents
-    assert "pd.read_parquet(transform_result[\"processed_file\"])" in contents
+    assert 'pd.read_parquet(transform_result["processed_file"])' in contents

@@ -62,7 +62,9 @@ def test_apply_migrations_runs_pending_files(monkeypatch):
     executed_queries = [query.strip() for query, _params in cursor.executed]
     insert_calls = [(query.strip(), params) for query, params in cursor.executed]
 
-    assert any("CREATE TABLE IF NOT EXISTS public.schema_migrations" in query for query in executed_queries)
+    assert any(
+        "CREATE TABLE IF NOT EXISTS public.schema_migrations" in query for query in executed_queries
+    )
     assert "SELECT version FROM public.schema_migrations;" in executed_queries
     assert "CREATE TABLE demo(id INT);" in executed_queries
     assert (

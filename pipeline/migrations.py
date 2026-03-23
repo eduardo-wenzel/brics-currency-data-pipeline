@@ -65,4 +65,3 @@ def apply_migrations(force: bool = False):
         _MIGRATIONS_APPLIED = True
     finally:
         conn.close()
-
