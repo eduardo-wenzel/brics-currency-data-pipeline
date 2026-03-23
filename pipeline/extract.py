@@ -6,10 +6,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-try:
-    from pipeline.storage import save_raw_data as persist_raw_data
-except ImportError:
-    from storage import save_raw_data as persist_raw_data
+from pipeline.storage import save_raw_data as persist_raw_data
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 

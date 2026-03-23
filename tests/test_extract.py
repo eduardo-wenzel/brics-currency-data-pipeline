@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+from uuid import uuid4
 
 from pipeline import extract, storage
 
@@ -30,8 +32,10 @@ class DummyS3Client:
         return {"Body": DummyBody(body)}
 
 
-def test_save_raw_data_writes_json(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+def test_save_raw_data_writes_json(monkeypatch):
+    test_root = Path("data/test_tmp") / f"extract-{uuid4().hex}"
+    test_root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.chdir(test_root)
     monkeypatch.setenv("DATA_LAKE_BACKEND", "local")
     payload = {"base": "USD", "rates": {"BRL": 5.0}}
 

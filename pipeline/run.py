@@ -2,14 +2,10 @@ import logging
 import os
 import time
 
-try:
-    from pipeline.extract import fetch_exchange_rates, save_raw_data
-    from pipeline.load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
-    from pipeline.transform import save_processed_data, transform_latest_file
-except ImportError:
-    from extract import fetch_exchange_rates, save_raw_data
-    from load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
-    from transform import save_processed_data, transform_latest_file
+from pipeline.extract import fetch_exchange_rates, save_raw_data
+from pipeline.load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
+from pipeline.migrations import apply_migrations
+from pipeline.transform import save_processed_data, transform_latest_file
 
 
 def _should_skip_db_load() -> bool:
@@ -37,6 +33,7 @@ def run_pipeline():
         if _should_skip_db_load():
             logging.info("SKIP_DB_LOAD=true: carga no PostgreSQL ignorada.")
         else:
+            apply_migrations()
             run_id = create_pipeline_run()
             loaded_count = load_to_postgres(df, run_id=run_id)
             finalize_pipeline_run(run_id, status="SUCCESS", records_loaded=loaded_count)

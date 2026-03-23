@@ -6,10 +6,7 @@ from pathlib import Path
 import pandas as pd
 from dotenv import load_dotenv
 
-try:
-    from pipeline import storage as storage_module
-except ImportError:
-    import storage as storage_module
+from pipeline import storage as storage_module
 
 get_latest_raw_file_from_storage = storage_module.get_latest_raw_file
 read_raw_data = storage_module.read_raw_data
@@ -68,8 +65,7 @@ def _normalize_raw_payload(data: dict) -> dict:
     }
 
 
-def transform_latest_file():
-    file_path = get_latest_raw_file()
+def transform_raw_file(file_path):
     raw_data = read_raw_data(file_path)
 
     normalized = _normalize_raw_payload(raw_data)
@@ -90,6 +86,11 @@ def transform_latest_file():
     logging.info(f"Colunas: {df.columns.tolist()}")
 
     return df
+
+
+def transform_latest_file():
+    file_path = get_latest_raw_file()
+    return transform_raw_file(file_path)
 
 
 def save_processed_data(df):
