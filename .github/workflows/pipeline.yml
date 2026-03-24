@@ -9,8 +9,8 @@ jobs:
   run-pipeline:
     runs-on: ubuntu-latest
     env:
-      API_URL: ${{ secrets.API_URL }}
-      CURRENCIES: ${{ secrets.CURRENCIES }}
+      API_URL: ${{ vars.API_URL || secrets.API_URL || 'https://api.exchangerate-api.com/v4/latest/USD' }}
+      CURRENCIES: ${{ vars.CURRENCIES || secrets.CURRENCIES || 'BRL,RUB,INR,CNY,ZAR' }}
       SKIP_DB_LOAD: 'true'
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
