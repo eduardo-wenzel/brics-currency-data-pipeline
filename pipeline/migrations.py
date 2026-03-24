@@ -65,3 +65,11 @@ def apply_migrations(force: bool = False):
         _MIGRATIONS_APPLIED = True
     finally:
         conn.close()
+
+
+def main():
+    apply_migrations(force=True)
+
+
+if __name__ == "__main__":
+    main()

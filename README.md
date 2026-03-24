@@ -202,18 +202,18 @@ pip install -r requirements-dev.txt
 3. Execute o pipeline:
 
 ```bash
-python scripts/apply_migrations.py
-python pipeline/run.py
+python -m pipeline.migrations
+python -m pipeline.run
 ```
 
 Execucao por etapa:
 
 ```bash
-python pipeline/extract.py
-python pipeline/transform.py
+python -m pipeline.extract
+python -m pipeline.transform
 ```
 
-O script `python scripts/apply_migrations.py` aplica os arquivos SQL em `sql/` e registra as versoes em `public.schema_migrations`.
+O comando `python -m pipeline.migrations` aplica os arquivos SQL em `sql/` e registra as versoes em `public.schema_migrations`.
 
 ## Configurando o data lake no S3
 
