@@ -9,6 +9,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 def _get_connection():
+    """Open a PostgreSQL connection using project environment variables."""
     return psycopg2.connect(
         host=os.getenv("PG_HOST"),
         database=os.getenv("PG_DATABASE"),
@@ -19,6 +20,7 @@ def _get_connection():
 
 
 def create_pipeline_run() -> int:
+    """Create a pipeline execution log row and return its run id."""
     conn = _get_connection()
     try:
         with conn.cursor() as cursor:
@@ -39,6 +41,7 @@ def create_pipeline_run() -> int:
 def finalize_pipeline_run(
     run_id: int, status: str, records_loaded: int = 0, error_message: str | None = None
 ):
+    """Finalize a pipeline execution log row with outcome metadata."""
     conn = _get_connection()
     try:
         with conn.cursor() as cursor:
@@ -59,6 +62,7 @@ def finalize_pipeline_run(
 
 
 def load_to_postgres(df, run_id: int | None = None):
+    """Load the silver dataframe into the analytics tables."""
     conn = _get_connection()
     try:
         with conn.cursor() as cursor:
@@ -107,6 +111,7 @@ def load_to_postgres(df, run_id: int | None = None):
 
 
 def main():
+    """Prevent direct execution of the load step without the orchestrated flow."""
     raise SystemExit("Use pipeline/run.py para executar o fluxo completo.")
 
 

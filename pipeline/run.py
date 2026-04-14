@@ -3,16 +3,19 @@ import os
 import time
 
 from pipeline.extract import fetch_exchange_rates, save_raw_data
+from pipeline.gold import build_and_save_gold_data
 from pipeline.load import create_pipeline_run, finalize_pipeline_run, load_to_postgres
 from pipeline.migrations import apply_migrations
 from pipeline.transform import save_processed_data, transform_latest_file
 
 
 def _should_skip_db_load() -> bool:
+    """Return whether the relational load stage should be skipped."""
     return os.getenv("SKIP_DB_LOAD", "false").strip().lower() in {"1", "true", "yes"}
 
 
 def run_pipeline():
+    """Execute the end-to-end pipeline from extract to load."""
     start = time.time()
     run_id = None
 
@@ -25,10 +28,13 @@ def run_pipeline():
         raw_file = save_raw_data(data)
         df = transform_latest_file()
         processed_file = save_processed_data(df)
+        gold_df, gold_file = build_and_save_gold_data()
         processed_count = len(df)
         logging.info(f"{processed_count} currencies processed")
         logging.info(f"Raw salvo em: {raw_file}")
         logging.info(f"Silver salvo em: {processed_file}")
+        logging.info(f"Gold salvo em: {gold_file}")
+        logging.info(f"{len(gold_df)} registros gold gerados")
 
         if _should_skip_db_load():
             logging.info("SKIP_DB_LOAD=true: carga no PostgreSQL ignorada.")

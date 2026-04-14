@@ -12,13 +12,16 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 
 LOCAL_RAW_DIR = Path("data/raw")
 LOCAL_PROCESSED_DIR = Path("data/processed")
+LOCAL_GOLD_DIR = Path("data/gold")
 
 
 def storage_backend() -> str:
+    """Return the configured storage backend name."""
     return os.getenv("DATA_LAKE_BACKEND", "local").strip().lower()
 
 
 def _s3_bucket() -> str:
+    """Return the configured S3 bucket name or fail fast."""
     bucket = os.getenv("AWS_S3_BUCKET", "").strip()
     if not bucket:
         raise OSError("Variavel de ambiente AWS_S3_BUCKET nao configurada.")
@@ -26,20 +29,24 @@ def _s3_bucket() -> str:
 
 
 def _s3_region() -> str:
+    """Return the configured AWS region for S3 operations."""
     return (os.getenv("AWS_DEFAULT_REGION") or os.getenv("AWS_REGION") or "").strip()
 
 
 def _s3_prefix() -> str:
+    """Return the base S3 prefix used by the project."""
     return os.getenv("AWS_S3_PREFIX", "brics-currency").strip().strip("/")
 
 
 def _s3_layer_prefix(layer: str) -> str:
+    """Return the prefix for a specific medallion layer."""
     default = f"{layer}/exchange_rates"
     env_name = f"S3_{layer.upper()}_PREFIX"
     return os.getenv(env_name, default).strip().strip("/")
 
 
 def _s3_client():
+    """Create an S3 client only when the backend requires it."""
     try:
         import boto3
     except ModuleNotFoundError as exc:
@@ -51,6 +58,7 @@ def _s3_client():
 
 
 def _build_s3_key(layer: str, timestamp: str, extension: str, reference_date: Any = None) -> str:
+    """Build the object key for a layer asset in S3."""
     parts = [_s3_prefix(), _s3_layer_prefix(layer)]
     if reference_date is not None:
         reference = str(reference_date)
@@ -66,10 +74,12 @@ def _build_s3_key(layer: str, timestamp: str, extension: str, reference_date: An
 
 
 def _to_s3_uri(key: str) -> str:
+    """Convert an object key into an S3 URI."""
     return f"s3://{_s3_bucket()}/{key}"
 
 
 def _raise_s3_error(exc: Exception, action: str, key: str | None = None):
+    """Translate low-level S3 client exceptions into clearer project errors."""
     error_code = None
     try:
         error_code = exc.response.get("Error", {}).get("Code")
@@ -105,6 +115,7 @@ def _raise_s3_error(exc: Exception, action: str, key: str | None = None):
 
 
 def _put_object(*, key: str, body: bytes, content_type: str):
+    """Write an object to the configured S3 bucket."""
     try:
         _s3_client().put_object(
             Bucket=_s3_bucket(),
@@ -117,6 +128,7 @@ def _put_object(*, key: str, body: bytes, content_type: str):
 
 
 def _list_objects(prefix: str):
+    """List objects under a given S3 prefix."""
     try:
         response = _s3_client().list_objects_v2(Bucket=_s3_bucket(), Prefix=prefix)
     except Exception as exc:
@@ -125,6 +137,7 @@ def _list_objects(prefix: str):
 
 
 def _get_object_bytes(key: str) -> bytes:
+    """Read raw bytes from an object in S3."""
     try:
         response = _s3_client().get_object(Bucket=_s3_bucket(), Key=key)
     except Exception as exc:
@@ -133,6 +146,7 @@ def _get_object_bytes(key: str) -> bytes:
 
 
 def save_raw_data(data: dict):
+    """Persist the raw payload into the bronze layer."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     if storage_backend() == "s3":
@@ -149,6 +163,7 @@ def save_raw_data(data: dict):
 
 
 def get_latest_raw_file():
+    """Return the latest bronze object reference from local storage or S3."""
     if storage_backend() == "s3":
         prefix = f"{_s3_prefix()}/{_s3_layer_prefix('bronze')}/"
         contents = _list_objects(prefix)
@@ -163,6 +178,7 @@ def get_latest_raw_file():
 
 
 def read_raw_data(file_ref) -> dict:
+    """Read a raw bronze payload from local storage or S3."""
     if isinstance(file_ref, str) and file_ref.startswith("s3://"):
         file_ref = file_ref.removeprefix(f"s3://{_s3_bucket()}/")
 
@@ -177,7 +193,32 @@ def read_raw_data(file_ref) -> dict:
         return json.load(file)
 
 
+def list_processed_files() -> list[Path | str]:
+    """List available silver parquet files from the configured storage backend."""
+    if storage_backend() == "s3":
+        prefix = f"{_s3_prefix()}/{_s3_layer_prefix('silver')}/"
+        contents = _list_objects(prefix)
+        return [item["Key"] for item in sorted(contents, key=lambda item: item["Key"])]
+
+    return sorted(LOCAL_PROCESSED_DIR.glob("*.parquet"))
+
+
+def read_processed_data(file_ref) -> pd.DataFrame:
+    """Read a silver parquet file from local storage or S3."""
+    if isinstance(file_ref, str) and file_ref.startswith("s3://"):
+        file_ref = file_ref.removeprefix(f"s3://{_s3_bucket()}/")
+
+    if isinstance(file_ref, Path):
+        return pd.read_parquet(file_ref)
+
+    if storage_backend() == "s3" or isinstance(file_ref, str):
+        return pd.read_parquet(io.BytesIO(_get_object_bytes(file_ref)))
+
+    return pd.read_parquet(file_ref)
+
+
 def save_processed_data(df: pd.DataFrame):
+    """Persist the silver dataframe as parquet."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     reference_date = None if df.empty else df["reference_date"].iloc[0]
 
@@ -191,5 +232,24 @@ def save_processed_data(df: pd.DataFrame):
 
     LOCAL_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     output_file = LOCAL_PROCESSED_DIR / f"brics_rates_{timestamp}.parquet"
+    df.to_parquet(output_file, index=False)
+    return output_file
+
+
+def save_gold_data(df: pd.DataFrame):
+    """Persist the gold dataframe as parquet."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    reference_date = None if df.empty else df["reference_date"].max()
+
+    if storage_backend() == "s3":
+        key = _build_s3_key("gold", timestamp, "parquet", reference_date=reference_date)
+        buffer = io.BytesIO()
+        df.to_parquet(buffer, index=False)
+        buffer.seek(0)
+        _put_object(key=key, body=buffer.getvalue(), content_type="application/octet-stream")
+        return _to_s3_uri(key)
+
+    LOCAL_GOLD_DIR.mkdir(parents=True, exist_ok=True)
+    output_file = LOCAL_GOLD_DIR / f"brics_rates_gold_{timestamp}.parquet"
     df.to_parquet(output_file, index=False)
     return output_file

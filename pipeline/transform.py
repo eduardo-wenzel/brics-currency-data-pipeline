@@ -18,16 +18,19 @@ CURRENCIES = os.getenv("CURRENCIES", "")
 
 
 def get_latest_raw_file():
+    """Return the latest raw payload reference from the configured bronze storage."""
     latest_file = get_latest_raw_file_from_storage()
     logging.info(f"Arquivo raw mais recente: {latest_file}")
     return latest_file
 
 
 def _parse_currencies(raw_value: str) -> list[str]:
+    """Parse the configured currency list into normalized currency codes."""
     return [item.strip().upper() for item in raw_value.split(",") if item.strip()]
 
 
 def _parse_reference_date(raw_value: str):
+    """Parse supported source date formats into a date object."""
     try:
         return datetime.strptime(raw_value, "%a, %d %b %Y %H:%M:%S %z").date()
     except ValueError:
@@ -35,6 +38,7 @@ def _parse_reference_date(raw_value: str):
 
 
 def _normalize_raw_payload(data: dict) -> dict:
+    """Normalize API payload variants into a single transform contract."""
     rates = data.get("conversion_rates") or data.get("rates")
     if not isinstance(rates, dict) or not rates:
         raise ValueError("Estrutura inesperada: taxas de cambio nao encontradas.")
@@ -66,6 +70,7 @@ def _normalize_raw_payload(data: dict) -> dict:
 
 
 def transform_raw_file(file_path):
+    """Transform a raw JSON payload into the normalized silver dataframe."""
     raw_data = read_raw_data(file_path)
 
     normalized = _normalize_raw_payload(raw_data)
@@ -89,17 +94,20 @@ def transform_raw_file(file_path):
 
 
 def transform_latest_file():
+    """Transform the most recent raw file available in bronze storage."""
     file_path = get_latest_raw_file()
     return transform_raw_file(file_path)
 
 
 def save_processed_data(df):
+    """Persist the silver dataframe in parquet format."""
     output_file = persist_processed_data(df)
     logging.info(f"Arquivo parquet salvo em: {output_file}")
     return output_file
 
 
 def main():
+    """Run the transform step as a module entrypoint."""
     df = transform_latest_file()
     save_processed_data(df)
 

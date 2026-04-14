@@ -113,3 +113,13 @@ def test_apply_migrations_runs_once_per_process(monkeypatch):
 
     assert first_conn.commit_calls == 1
     assert second_conn.commit_calls == 1
+
+
+def test_read_migration_sql_strips_utf8_bom():
+    migration_dir = _make_migration_dir("migrations-bom")
+    migration_file = migration_dir / "001_create_tables.sql"
+    migration_file.write_text("\ufeffCREATE TABLE demo(id INT);", encoding="utf-8")
+
+    sql = migrations._read_migration_sql(migration_file)
+
+    assert sql == "CREATE TABLE demo(id INT);"

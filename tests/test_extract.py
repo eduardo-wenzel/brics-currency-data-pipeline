@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from uuid import uuid4
 
+import requests
+
 from pipeline import extract, storage
 
 
@@ -78,3 +80,35 @@ def test_fetch_exchange_rates_success(monkeypatch):
 
     assert data["base"] == "USD"
     assert "BRL" in data["rates"]
+
+
+def test_fetch_exchange_rates_retries_and_uses_fallback(monkeypatch):
+    class DummyResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"base": "USD", "rates": {"BRL": 5.0}}
+
+    calls = []
+
+    def fake_get(url, timeout):
+        calls.append(url)
+        if url == "https://primary.example.com":
+            raise requests.RequestException("primary down")
+        return DummyResponse()
+
+    monkeypatch.setattr(extract, "BASE_URL", "https://primary.example.com")
+    monkeypatch.setattr(extract, "FALLBACK_URL", "https://fallback.example.com")
+    monkeypatch.setenv("API_MAX_RETRIES", "2")
+    monkeypatch.setenv("API_RETRY_BACKOFF_SECONDS", "0")
+    monkeypatch.setattr(extract.requests, "get", fake_get)
+
+    data = extract.fetch_exchange_rates()
+
+    assert data["base"] == "USD"
+    assert calls == [
+        "https://primary.example.com",
+        "https://primary.example.com",
+        "https://fallback.example.com",
+    ]
