@@ -70,12 +70,10 @@ def test_build_gold_dataframe_calculates_change_metrics(monkeypatch):
     assert len(dataframe) == 4
 
     brl_day_2 = dataframe[
-        (dataframe["target_currency"] == "BRL")
-        & (dataframe["reference_date"] == date(2026, 3, 7))
+        (dataframe["target_currency"] == "BRL") & (dataframe["reference_date"] == date(2026, 3, 7))
     ].iloc[0]
     cny_day_2 = dataframe[
-        (dataframe["target_currency"] == "CNY")
-        & (dataframe["reference_date"] == date(2026, 3, 7))
+        (dataframe["target_currency"] == "CNY") & (dataframe["reference_date"] == date(2026, 3, 7))
     ].iloc[0]
 
     assert brl_day_2["previous_rate"] == 5.0
@@ -147,7 +145,7 @@ def test_save_gold_data_writes_to_s3(monkeypatch):
                 "rate_rank": 1,
                 "currencies_in_snapshot": 2,
                 "snapshot_generated_at": pd.Timestamp("2026-03-07T00:00:00Z"),
-            }
+            },
         ]
     )
 

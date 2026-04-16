@@ -48,7 +48,9 @@ def test_run_pipeline_generates_gold_and_skips_db(monkeypatch):
     monkeypatch.setattr(run, "fetch_exchange_rates", lambda: {"base": "USD", "rates": {"BRL": 5.0}})
     monkeypatch.setattr(run, "save_raw_data", lambda _payload: Path("data/raw/sample.json"))
     monkeypatch.setattr(run, "transform_latest_file", lambda: silver_df)
-    monkeypatch.setattr(run, "save_processed_data", lambda _df: Path("data/processed/sample.parquet"))
+    monkeypatch.setattr(
+        run, "save_processed_data", lambda _df: Path("data/processed/sample.parquet")
+    )
     monkeypatch.setattr(
         run, "build_and_save_gold_data", lambda: (gold_df, Path("data/gold/sample.parquet"))
     )
@@ -56,7 +58,9 @@ def test_run_pipeline_generates_gold_and_skips_db(monkeypatch):
     called = {"migrations": 0, "create_run": 0, "load": 0, "finalize": 0}
     monkeypatch.setattr(run, "apply_migrations", lambda: called.__setitem__("migrations", 1))
     monkeypatch.setattr(run, "create_pipeline_run", lambda: called.__setitem__("create_run", 1))
-    monkeypatch.setattr(run, "load_to_postgres", lambda *_args, **_kwargs: called.__setitem__("load", 1))
+    monkeypatch.setattr(
+        run, "load_to_postgres", lambda *_args, **_kwargs: called.__setitem__("load", 1)
+    )
     monkeypatch.setattr(
         run,
         "finalize_pipeline_run",

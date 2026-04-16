@@ -32,8 +32,7 @@ def _normalize_silver_schema(dataframe: pd.DataFrame) -> pd.DataFrame:
     missing = [column for column in required_columns if column not in normalized.columns]
     if missing:
         raise ValueError(
-            "Arquivo silver com schema inesperado. Colunas ausentes: "
-            + ", ".join(sorted(missing))
+            "Arquivo silver com schema inesperado. Colunas ausentes: " + ", ".join(sorted(missing))
         )
 
     return normalized[required_columns]
@@ -67,7 +66,9 @@ def build_gold_dataframe() -> pd.DataFrame:
     """Build the gold dataframe with trend and ranking metrics."""
     history = _load_silver_history()
 
-    history["previous_rate"] = history.groupby(["base_currency", "target_currency"])["rate"].shift(1)
+    history["previous_rate"] = history.groupby(["base_currency", "target_currency"])["rate"].shift(
+        1
+    )
     history["rate_change"] = history["rate"] - history["previous_rate"]
     history["rate_change_pct"] = (history["rate_change"] / history["previous_rate"]) * 100
 
