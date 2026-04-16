@@ -5,6 +5,8 @@
 
 $ErrorActionPreference = "Stop"
 
+Write-Warning "register_task.ps1 e um atalho local para Windows Task Scheduler. Para producao, prefira Apache Airflow."
+
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $runScript = Join-Path $projectRoot "scripts\run_pipeline.ps1"
 

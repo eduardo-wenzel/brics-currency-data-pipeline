@@ -419,9 +419,11 @@ Opcionais para alertas CI:
 
 ## Automacao e CI/CD
 
-- Local: `scripts/register_task.ps1` (Windows Task Scheduler).
+- Producao/orquestracao: `dags/brics_currency_pipeline_dag.py` com Apache Airflow.
+- Local apenas: `scripts/register_task.ps1` (Windows Task Scheduler) como conveniencia para ambientes Windows sem orquestrador dedicado.
 - GitHub Actions: `.github/workflows/pipeline.yml` para execucao automatizada e checks de qualidade.
-- Airflow: `dags/brics_currency_pipeline_dag.py` para orquestracao operacional do pipeline.
+
+Para um ambiente production-ready, prefira Airflow como scheduler principal. O uso de Windows Task Scheduler fica restrito a demonstracoes locais, labs ou automacoes simples em maquina unica.
 
 ## Roadmap
 
