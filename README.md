@@ -44,6 +44,20 @@ graph TD
     F --> J[pipeline_run_log]
 ```
 
+## Linhagem dos Dados
+
+O fluxo de linhagem abaixo destaca o ciclo de vida completo do dado, desde a API publica ate os modelos finais consumiveis:
+
+```mermaid
+graph LR
+    A[API Source] --> B[(Bronze Layer: JSON)]
+    B --> C[Python/Pandas]
+    C --> D[(Silver Layer: Parquet)]
+    D --> E[dbt Staging]
+    E --> F[dbt Marts: Gold Layer]
+    F --> G[(PostgreSQL: Final Models)]
+```
+
 ## Visualizacao do Projeto
 
 ### Infraestrutura conteinerizada
@@ -66,6 +80,12 @@ Implementacao de Data Lake com separacao de camadas Bronze (Raw), Silver (Proces
 - Bronze: payload bruto da API, sem enriquecimento.
 - Silver: dados normalizados por moeda e data de referencia.
 - Gold: visao analitica derivada da Silver com taxa anterior, variacao absoluta, variacao percentual, tendencia e ranking por snapshot.
+
+## Modelo Medalhao
+
+- Bronze: raw API response persistido em JSON, sem regras de negocio aplicadas.
+- Silver: dados limpos, normalizados e particionados em Parquet para consumo tecnico e reprocessamento.
+- Gold: modelos analiticos prontos para negocio, com metricas e estruturas consumiveis via dbt e PostgreSQL.
 
 ### Consumo analitico em SQL
 ![SQL Analysis](docs/images/sql_results.png)
@@ -248,6 +268,14 @@ python -m pipeline.migrations
 python -m pipeline.run
 ```
 
+Pipeline completo + camada analitica com scripts cross-platform:
+
+```bash
+./scripts/run_pipeline.sh
+./scripts/dbt.sh run
+./scripts/dbt.sh test
+```
+
 Execucao por etapa:
 
 ```bash
@@ -257,6 +285,7 @@ python -m pipeline.gold
 ```
 
 O comando `python -m pipeline.migrations` aplica os arquivos SQL em `sql/` e registra as versoes em `public.schema_migrations`.
+Os scripts `dbt.sh` e `dbt.ps1` permitem rodar apenas as transformacoes e testes da camada analitica sem reexecutar a ingestao.
 
 ## Configurando o data lake no S3
 
@@ -307,6 +336,12 @@ ruff check .
 black --check .
 pre-commit run --all-files
 ```
+
+## Data Quality & Testing
+
+- Pytest: valida a logica de extracao, retries, normalizacao, transformacao, geracao da camada Gold e fluxos principais do pipeline Python.
+- dbt Tests: garantem qualidade dos dados analiticos, incluindo taxas positivas, unicidade de snapshots, integridade referencial e consistencia operacional das tabelas carregadas.
+- GitHub Actions: executa automaticamente os checks de qualidade e o pipeline agendado.
 
 ## Qualidade de dados com dbt
 
