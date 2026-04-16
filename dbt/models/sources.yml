@@ -1,0 +1,92 @@
+version: 2
+
+sources:
+  - name: analytics
+    description: Tabelas analiticas carregadas pelo pipeline BRICS no PostgreSQL.
+    schema: analytics
+    tables:
+      - name: fact_exchange_rate
+        description: Snapshot atual por moeda base, moeda alvo e data de referencia.
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: base_currency
+            tests:
+              - not_null
+          - name: target_currency
+            tests:
+              - not_null
+          - name: rate
+            tests:
+              - not_null
+          - name: reference_date
+            tests:
+              - not_null
+
+      - name: fact_exchange_rate_history
+        description: Historico append-only carregado a cada execucao do pipeline.
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: pipeline_run_id
+            tests:
+              - relationships:
+                  arguments:
+                    to: source('analytics', 'pipeline_run_log')
+                    field: run_id
+          - name: base_currency
+            tests:
+              - not_null
+          - name: target_currency
+            tests:
+              - not_null
+          - name: rate
+            tests:
+              - not_null
+          - name: reference_date
+            tests:
+              - not_null
+          - name: loaded_at
+            tests:
+              - not_null
+
+      - name: exchange_rates
+        description: Serie temporal simplificada para consumo rapido.
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: currency
+            tests:
+              - not_null
+          - name: rate
+            tests:
+              - not_null
+          - name: timestamp
+            tests:
+              - not_null
+
+      - name: pipeline_run_log
+        description: Log de execucao e auditoria operacional do pipeline.
+        columns:
+          - name: run_id
+            tests:
+              - not_null
+              - unique
+          - name: started_at
+            tests:
+              - not_null
+          - name: status
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['RUNNING', 'SUCCESS', 'FAILED']
+          - name: records_loaded
+            tests:
+              - not_null

@@ -300,6 +300,58 @@ black --check .
 pre-commit run --all-files
 ```
 
+## Qualidade de dados com dbt
+
+O projeto agora inclui uma estrutura dedicada em `dbt/` para validar a camada `analytics` no PostgreSQL.
+Os testes cobrem regras como:
+
+- chaves obrigatorias nas tabelas analiticas;
+- unicidade do snapshot em `fact_exchange_rate`;
+- valores aceitos para status do `pipeline_run_log`;
+- relacao entre historico e execucoes do pipeline;
+- taxas de cambio sempre positivas;
+- consistencia entre `finished_at` e o status da execucao.
+
+Prerequisito recomendado:
+
+- usar um ambiente Python 3.12 ou 3.13 para o `dbt`;
+- preencher as variaveis `PG_HOST`, `PG_DATABASE`, `PG_USER`, `PG_PASSWORD` e `PG_PORT` no arquivo `.env`.
+
+Instalacao:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Execucao no Windows PowerShell:
+
+```powershell
+./scripts/dbt.ps1 test
+```
+
+Execucao em Linux/macOS:
+
+```bash
+./scripts/dbt.sh test
+```
+
+Atalhos uteis:
+
+```bash
+./scripts/dbt.sh debug
+./scripts/dbt.sh parse
+```
+
+Os scripts carregam o `.env` automaticamente e validam as variaveis obrigatorias antes de chamar o `dbt`.
+
+Atalho pelo Makefile em ambientes com `make`:
+
+```bash
+make dbt-test
+```
+
+O profile do dbt usa as mesmas variaveis `PG_HOST`, `PG_DATABASE`, `PG_USER`, `PG_PASSWORD` e `PG_PORT` ja utilizadas pelo pipeline Python.
+
 ## Variaveis de ambiente
 
 Obrigatorias para o pipeline:
@@ -366,7 +418,7 @@ Opcionais para alertas CI:
 
 - [x] Migrar camadas de dados locais para S3 (Bronze/Silver/Gold).
 - [x] Adotar orquestrador dedicado com Airflow.
-- [ ] Adicionar testes de qualidade de dados (dbt/Great Expectations).
+- [x] Adicionar testes de qualidade de dados com dbt.
 - [ ] Expor dashboards em ferramenta de BI (Metabase/Superset).
 - [ ] Provisionar infraestrutura com Terraform.
 

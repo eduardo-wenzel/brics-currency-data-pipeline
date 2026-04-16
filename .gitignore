@@ -6,4 +6,7 @@ __pycache__/
 .conda/
 .ruff_cache/
 .pytest_cache/
+dbt/target/
+dbt/dbt_packages/
+dbt/.user.yml
 desktop.ini

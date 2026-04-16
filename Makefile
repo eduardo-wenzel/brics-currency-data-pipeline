@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint
+.PHONY: up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint dbt-test dbt-debug
 
 up:
 	./scripts/docker.sh up
@@ -43,3 +43,9 @@ test:
 
 lint:
 	.conda/python.exe -m ruff check .
+
+dbt-test:
+	./scripts/dbt.sh test
+
+dbt-debug:
+	./scripts/dbt.sh debug
