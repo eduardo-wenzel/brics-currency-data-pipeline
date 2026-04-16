@@ -12,5 +12,8 @@ def test_airflow_dag_file_exists():
     assert "gold_task" in contents
     assert "load_task" in contents
     assert "build_and_save_gold_data" in contents
+    assert '"retry_exponential_backoff": True' in contents
+    assert '"retries": _airflow_task_retries()' in contents
+    assert '"retry_delay": _airflow_retry_delay()' in contents
     assert "apply_migrations()" in contents
     assert 'pd.read_parquet(gold_result["processed_file"])' in contents

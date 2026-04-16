@@ -1,6 +1,22 @@
 SHELL := /bin/sh
 
-.PHONY: up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint dbt-test dbt-debug dbt-run dbt-build
+DEFAULT_GOAL := help
+
+.PHONY: help up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint dbt-test dbt-debug dbt-run dbt-build
+
+help:
+	@printf "%s\n" \
+	"Targets disponiveis:" \
+	"  make up            # sobe postgres" \
+	"  make run           # executa o pipeline no container app" \
+	"  make up-s3         # sobe o modo S3-only" \
+	"  make up-airflow    # sobe a stack do Airflow" \
+	"  make logs          # acompanha logs do app" \
+	"  make down          # derruba os servicos" \
+	"  make pipeline      # executa o pipeline localmente" \
+	"  make test          # roda pytest" \
+	"  make lint          # roda ruff" \
+	"  make dbt-test      # roda dbt test"
 
 up:
 	./scripts/docker.sh up

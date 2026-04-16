@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from airflow.decorators import dag, task
@@ -17,6 +17,15 @@ def _should_skip_db_load() -> bool:
     return os.getenv("SKIP_DB_LOAD", "false").strip().lower() in {"1", "true", "yes"}
 
 
+def _airflow_task_retries() -> int:
+    return max(0, int(os.getenv("AIRFLOW_TASK_RETRIES", "2")))
+
+
+def _airflow_retry_delay() -> timedelta:
+    seconds = max(1, int(os.getenv("AIRFLOW_RETRY_DELAY_SECONDS", "60")))
+    return timedelta(seconds=seconds)
+
+
 @dag(
     dag_id="brics_currency_pipeline",
     description="Coleta, transforma e carrega cotacoes BRICS com Airflow.",
@@ -24,6 +33,11 @@ def _should_skip_db_load() -> bool:
     start_date=datetime(2026, 3, 1),
     catchup=False,
     max_active_runs=1,
+    default_args={
+        "retries": _airflow_task_retries(),
+        "retry_delay": _airflow_retry_delay(),
+        "retry_exponential_backoff": True,
+    },
     tags=["brics", "fx", "elt"],
 )
 def brics_currency_pipeline():

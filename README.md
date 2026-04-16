@@ -175,11 +175,14 @@ Acesso PgAdmin: `http://localhost:5050`
 Atalhos adicionais:
 
 ```bash
+make
 make up
 make run
 make down
 make pipeline
 ```
+
+O alvo padrao `make` exibe um resumo dos comandos operacionais mais usados, evitando dependencia dos scripts PowerShell em ambientes Linux/macOS.
 
 ## Orquestracao com Airflow
 
@@ -209,6 +212,8 @@ Logs do orquestrador:
 Configuracoes relacionadas ao Airflow no `.env`:
 
 - `AIRFLOW_SCHEDULE`: cron da DAG (padrao: a cada 6 horas)
+- `AIRFLOW_TASK_RETRIES`: numero de retentativas por task no Airflow
+- `AIRFLOW_RETRY_DELAY_SECONDS`: atraso inicial entre retentativas
 - `AIRFLOW_ADMIN_USERNAME`
 - `AIRFLOW_ADMIN_PASSWORD`
 - `AIRFLOW_ADMIN_EMAIL`
@@ -224,6 +229,7 @@ pip install -r requirements-airflow.txt
 Observacao: a DAG usa o mesmo PostgreSQL do projeto para metadata do Airflow e para as tabelas analiticas, mas os objetos permanecem separados logicamente.
 
 Para evitar deadlocks na carga relacional quando houver disparos manuais e agendados ao mesmo tempo, a DAG foi configurada com `max_active_runs=1`, garantindo apenas uma execucao ativa por vez.
+As tasks tambem usam retry com backoff exponencial nativo do Airflow, o que reduz a fragilidade operacional quando a API publica falha temporariamente.
 
 ## Como executar localmente (desenvolvimento)
 
@@ -290,6 +296,8 @@ API_RETRY_BACKOFF_SECONDS=1.0
 - `API_FALLBACK_URL`: endpoint alternativo usado quando o primario esgota as tentativas.
 - `API_MAX_RETRIES`: numero de tentativas por endpoint.
 - `API_RETRY_BACKOFF_SECONDS`: atraso inicial entre tentativas, com multiplicacao exponencial.
+
+Quando executado via Airflow, o pipeline combina esse retry da camada Python com as retentativas nativas do orquestrador. Na pratica, falhas transientes da API podem ser absorvidas primeiro no request e, se persistirem, por uma nova tentativa da task no scheduler.
 
 ## Qualidade de codigo e testes
 
@@ -401,6 +409,8 @@ Opcionais para PgAdmin (Docker):
 Opcionais para Airflow:
 
 - `AIRFLOW_SCHEDULE`
+- `AIRFLOW_TASK_RETRIES`
+- `AIRFLOW_RETRY_DELAY_SECONDS`
 - `AIRFLOW_ADMIN_USERNAME`
 - `AIRFLOW_ADMIN_PASSWORD`
 - `AIRFLOW_ADMIN_EMAIL`
