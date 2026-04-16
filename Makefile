@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-.PHONY: up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint dbt-test dbt-debug
+.PHONY: up up-s3 up-airflow down logs logs-s3 logs-airflow run run-s3 ps pgadmin pipeline test lint dbt-test dbt-debug dbt-run dbt-build
 
 up:
 	./scripts/docker.sh up
@@ -49,3 +49,9 @@ dbt-test:
 
 dbt-debug:
 	./scripts/dbt.sh debug
+
+dbt-run:
+	./scripts/dbt.sh run
+
+dbt-build:
+	./scripts/dbt.sh build

@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: stg_analytics__fact_exchange_rate
+    description: Padroniza o snapshot atual carregado pelo pipeline.
+    columns:
+      - name: exchange_rate_id
+        tests:
+          - not_null
+          - unique
+      - name: base_currency
+        tests:
+          - not_null
+      - name: target_currency
+        tests:
+          - not_null
+      - name: rate
+        tests:
+          - not_null
+      - name: reference_date
+        tests:
+          - not_null
+
+  - name: stg_analytics__fact_exchange_rate_history
+    description: Padroniza o historico append-only das taxas de cambio.
+    columns:
+      - name: exchange_rate_history_id
+        tests:
+          - not_null
+          - unique
+      - name: pipeline_run_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_analytics__pipeline_run_log')
+                field: pipeline_run_id
+      - name: base_currency
+        tests:
+          - not_null
+      - name: target_currency
+        tests:
+          - not_null
+      - name: rate
+        tests:
+          - not_null
+      - name: reference_date
+        tests:
+          - not_null
+      - name: loaded_at
+        tests:
+          - not_null
+
+  - name: stg_analytics__exchange_rates
+    description: Padroniza a tabela de eventos simplificados de cambio.
+    columns:
+      - name: exchange_rate_event_id
+        tests:
+          - not_null
+          - unique
+      - name: currency
+        tests:
+          - not_null
+      - name: rate
+        tests:
+          - not_null
+      - name: recorded_at
+        tests:
+          - not_null
+
+  - name: stg_analytics__pipeline_run_log
+    description: Padroniza o log operacional do pipeline.
+    columns:
+      - name: pipeline_run_id
+        tests:
+          - not_null
+          - unique
+      - name: started_at
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['RUNNING', 'SUCCESS', 'FAILED']
+      - name: records_loaded
+        tests:
+          - not_null

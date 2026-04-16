@@ -14,4 +14,9 @@ clean-targets:
 
 models:
   brics_currency_pipeline:
-    +materialized: view
+    staging:
+      +schema: staging
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: view

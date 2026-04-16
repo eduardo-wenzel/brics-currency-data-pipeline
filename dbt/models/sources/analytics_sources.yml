@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: analytics
+    description: Tabelas analiticas carregadas pelo pipeline BRICS no PostgreSQL.
+    schema: analytics
+    tables:
+      - name: fact_exchange_rate
+        description: Snapshot atual por moeda base, moeda alvo e data de referencia.
+
+      - name: fact_exchange_rate_history
+        description: Historico append-only carregado a cada execucao do pipeline.
+
+      - name: exchange_rates
+        description: Serie temporal simplificada para consumo rapido.
+
+      - name: pipeline_run_log
+        description: Log de execucao e auditoria operacional do pipeline.

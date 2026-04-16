@@ -8,10 +8,10 @@ ENV_FILE="$PROJECT_ROOT/.env"
 DBT_DIR="$PROJECT_ROOT/dbt"
 
 case "$ACTION" in
-  test|debug|parse|deps)
+  test|debug|parse|deps|run|build)
     ;;
   *)
-    echo "Uso: ./scripts/dbt.sh {test|debug|parse|deps}" >&2
+    echo "Uso: ./scripts/dbt.sh {test|debug|parse|deps|run|build}" >&2
     exit 1
     ;;
 esac

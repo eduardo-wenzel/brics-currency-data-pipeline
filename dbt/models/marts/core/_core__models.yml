@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: fct_exchange_rate_current
+    description: Fato com o snapshot atual das taxas por moeda base e alvo.
+    columns:
+      - name: exchange_rate_id
+        tests:
+          - not_null
+          - unique
+      - name: rate
+        tests:
+          - not_null
+
+  - name: fct_exchange_rate_history
+    description: Fato com o historico de cargas append-only das taxas.
+    columns:
+      - name: exchange_rate_history_id
+        tests:
+          - not_null
+          - unique
+      - name: pipeline_run_id
+        tests:
+          - not_null
+
+  - name: fct_exchange_rate_events
+    description: Fato com a serie simplificada de eventos de cambio.
+    columns:
+      - name: exchange_rate_event_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_pipeline_runs
+    description: Dimensao operacional das execucoes do pipeline.
+    columns:
+      - name: pipeline_run_id
+        tests:
+          - not_null
+          - unique

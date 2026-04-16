@@ -302,7 +302,12 @@ pre-commit run --all-files
 
 ## Qualidade de dados com dbt
 
-O projeto agora inclui uma estrutura dedicada em `dbt/` para validar a camada `analytics` no PostgreSQL.
+O projeto agora inclui uma estrutura `dbt` mais alinhada ao fluxo classico de analytics engineering:
+
+- `sources`: declaracao das tabelas mantidas pelo pipeline Python no schema `analytics`;
+- `staging`: views com tipagem e padronizacao de nomes;
+- `marts`: views analiticas consumiveis e ponto principal para testes de negocio.
+
 Os testes cobrem regras como:
 
 - chaves obrigatorias nas tabelas analiticas;
@@ -326,12 +331,14 @@ pip install -r requirements-dev.txt
 Execucao no Windows PowerShell:
 
 ```powershell
+./scripts/dbt.ps1 run
 ./scripts/dbt.ps1 test
 ```
 
 Execucao em Linux/macOS:
 
 ```bash
+./scripts/dbt.sh run
 ./scripts/dbt.sh test
 ```
 
@@ -340,9 +347,11 @@ Atalhos uteis:
 ```bash
 ./scripts/dbt.sh debug
 ./scripts/dbt.sh parse
+./scripts/dbt.sh build
 ```
 
 Os scripts carregam o `.env` automaticamente e validam as variaveis obrigatorias antes de chamar o `dbt`.
+Ao executar `run` ou `build`, o dbt passa a materializar os schemas `staging` e `marts` no PostgreSQL, desde que o usuario do banco tenha permissao para criar schemas e views.
 
 Atalho pelo Makefile em ambientes com `make`:
 

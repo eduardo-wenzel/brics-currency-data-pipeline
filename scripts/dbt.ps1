@@ -1,6 +1,6 @@
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('test', 'debug', 'parse', 'deps')]
+    [ValidateSet('test', 'debug', 'parse', 'deps', 'run', 'build')]
     [string]$Action = 'test'
 )
 

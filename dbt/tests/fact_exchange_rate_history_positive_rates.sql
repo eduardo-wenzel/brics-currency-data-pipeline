@@ -1,4 +1,4 @@
 select *
-from {{ source('analytics', 'fact_exchange_rate_history') }}
+from {{ ref('fct_exchange_rate_history') }}
 where rate <= 0
    or rate is null
