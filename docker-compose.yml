@@ -141,6 +141,22 @@ services:
       SKIP_DB_LOAD: "true"
     command: ["python", "-m", "pipeline.run"]
 
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt
+    profiles: ["dbt"]
+    env_file:
+      - .env
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./dbt:/app/dbt
+
   pgadmin:
     image: dpage/pgadmin4:9
     container_name: brics-pgadmin
@@ -155,5 +171,22 @@ services:
       postgres:
         condition: service_healthy
 
+  metabase:
+    image: ${METABASE_IMAGE:-metabase/metabase:latest}
+    container_name: brics-metabase
+    restart: unless-stopped
+    profiles: ["bi"]
+    environment:
+      MB_DB_FILE: /metabase-data/metabase.db
+      MB_SITE_URL: ${METABASE_SITE_URL:-http://localhost:3000}
+    ports:
+      - "${METABASE_PORT:-3000}:3000"
+    volumes:
+      - metabase_data:/metabase-data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  metabase_data:
