@@ -38,8 +38,8 @@ function Set-DotEnvVariables {
 function Assert-RequiredVariables {
     $required = @('PG_HOST', 'PG_DATABASE', 'PG_USER', 'PG_PASSWORD', 'PG_PORT')
     $missing = foreach ($variableName in $required) {
-        $envItem = Get-Item -Path "Env:$variableName" -ErrorAction SilentlyContinue
-        if (-not $envItem -or [string]::IsNullOrWhiteSpace($envItem.Value)) {
+        $value = [Environment]::GetEnvironmentVariable($variableName)
+        if ([string]::IsNullOrWhiteSpace($value)) {
             $variableName
         }
     }
@@ -51,8 +51,8 @@ function Assert-RequiredVariables {
 
 function Get-DbtCommand {
     $candidates = @(
-        (Get-Command dbt -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
-        (Join-Path $projectRoot '.conda\Scripts\dbt.exe')
+        (Join-Path $projectRoot '.conda\Scripts\dbt.exe'),
+        (Get-Command dbt -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue)
     ) | Where-Object { $_ }
 
     foreach ($candidate in $candidates) {
@@ -64,8 +64,28 @@ function Get-DbtCommand {
     throw "Executavel do dbt nao encontrado. Ative um ambiente com dbt instalado ou instale as dependencias de dev."
 }
 
+function Test-LocalPythonSupportsDbt {
+    $python = Join-Path $projectRoot '.conda\python.exe'
+    if (-not (Test-Path -LiteralPath $python)) {
+        return $true
+    }
+
+    $version = & $python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+    return ([version]$version -lt [version]'3.14')
+}
+
+function Invoke-DbtDocker {
+    & docker compose --profile dbt run --rm dbt $Action --project-dir /app/dbt --profiles-dir /app/dbt
+}
+
 Set-DotEnvVariables -Path $envFile
 Assert-RequiredVariables
+
+if (-not (Test-LocalPythonSupportsDbt)) {
+    Write-Host "Python local 3.14+ detectado; executando dbt em container Python 3.12."
+    Invoke-DbtDocker
+    exit $LASTEXITCODE
+}
 
 $dbt = Get-DbtCommand
 & $dbt $Action --project-dir $projectDir --profiles-dir $profilesDir

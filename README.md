@@ -42,6 +42,7 @@ graph TD
     F --> H[fact_exchange_rate_history]
     F --> I[exchange_rates]
     F --> J[pipeline_run_log]
+    F --> L[Metabase: dashboards BI]
 ```
 
 ## Linhagem dos Dados
@@ -74,6 +75,9 @@ Monitoramento detalhado de execucao e rastreabilidade de dados.
 ![Data Lake S3](docs/images/s3_layers.png)
 
 Implementacao de Data Lake com separacao de camadas Bronze (Raw), Silver (Processed/Parquet) e Gold (metricas analiticas).
+
+### Dashboard BI com Metabase
+![Dashboard Metabase](docs/images/metabase_dashboard.png)
 
 ## Camadas do Data Lake
 
@@ -186,7 +190,36 @@ Ou, em ambientes Linux/macOS:
 
 Acesso PgAdmin: `http://localhost:5050`
 
-8. Pare o ambiente:
+8. Suba o Metabase para dashboards visuais de BI (opcional):
+
+```powershell
+./scripts/docker.ps1 metabase
+```
+
+Opcao cross-platform:
+
+```bash
+./scripts/docker.sh metabase
+```
+
+Acesso Metabase: `http://localhost:3000`
+
+Na configuracao inicial do Metabase, conecte o banco PostgreSQL usando:
+
+- host: `postgres`
+- porta: `5432`
+- database: valor de `PG_DATABASE` (padrao Docker: `brics_pipeline`)
+- usuario: valor de `PG_USER` (padrao Docker: `postgres`)
+- senha: valor de `PG_PASSWORD` (padrao Docker: `postgres`)
+- schemas recomendados para analise: `analytics`, `marts` e `staging`
+
+Logs do Metabase:
+
+```powershell
+./scripts/docker.ps1 logs-metabase
+```
+
+9. Pare o ambiente:
 
 ```powershell
 ./scripts/docker.ps1 down
@@ -198,6 +231,7 @@ Atalhos adicionais:
 make
 make up
 make run
+make metabase
 make down
 make pipeline
 ```
@@ -441,6 +475,12 @@ Opcionais para PgAdmin (Docker):
 - `PGADMIN_DEFAULT_EMAIL`
 - `PGADMIN_DEFAULT_PASSWORD`
 
+Opcionais para Metabase (Docker):
+
+- `METABASE_IMAGE`
+- `METABASE_PORT`
+- `METABASE_SITE_URL`
+
 Opcionais para Airflow:
 
 - `AIRFLOW_SCHEDULE`
@@ -475,6 +515,5 @@ Para um ambiente production-ready, prefira Airflow como scheduler principal. O u
 - [x] Migrar camadas de dados locais para S3 (Bronze/Silver/Gold).
 - [x] Adotar orquestrador dedicado com Airflow.
 - [x] Adicionar testes de qualidade de dados com dbt.
-- [ ] Expor dashboards em ferramenta de BI (Metabase/Superset).
+- [x] Expor dashboards em ferramenta de BI com Metabase.
 - [ ] Provisionar infraestrutura com Terraform.
-

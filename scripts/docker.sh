@@ -18,7 +18,7 @@ case "$ACTION" in
     docker compose --profile airflow up --build -d postgres airflow-init airflow-webserver airflow-scheduler
     ;;
   down)
-    docker compose --profile s3 --profile admin --profile airflow down
+    docker compose --profile s3 --profile admin --profile airflow --profile bi down
     ;;
   logs)
     docker compose logs -f app
@@ -29,6 +29,9 @@ case "$ACTION" in
   logs-airflow)
     docker compose --profile airflow logs -f airflow-webserver airflow-scheduler
     ;;
+  logs-metabase)
+    docker compose --profile bi logs -f metabase
+    ;;
   run)
     docker compose run --rm app
     ;;
@@ -36,13 +39,16 @@ case "$ACTION" in
     docker compose --profile s3 run --rm app-s3
     ;;
   ps)
-    docker compose --profile s3 --profile admin --profile airflow ps
+    docker compose --profile s3 --profile admin --profile airflow --profile bi ps
     ;;
   pgadmin)
     docker compose --profile admin up -d pgadmin
     ;;
+  metabase)
+    docker compose --profile bi up -d postgres metabase
+    ;;
   *)
-    echo "Uso: ./scripts/docker.sh {build|up|up-s3|up-airflow|down|logs|logs-s3|logs-airflow|run|run-s3|ps|pgadmin}" >&2
+    echo "Uso: ./scripts/docker.sh {build|up|up-s3|up-airflow|down|logs|logs-s3|logs-airflow|logs-metabase|run|run-s3|ps|pgadmin|metabase}" >&2
     exit 1
     ;;
 esac
