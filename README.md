@@ -76,6 +76,9 @@ Monitoramento detalhado de execucao e rastreabilidade de dados.
 
 Implementacao de Data Lake com separacao de camadas Bronze (Raw), Silver (Processed/Parquet) e Gold (metricas analiticas).
 
+### Dashboard BI com Metabase
+![Dashboard Metabase](docs/images/metabase_dashboard.png)
+
 ## Camadas do Data Lake
 
 - Bronze: payload bruto da API, sem enriquecimento.
