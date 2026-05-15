@@ -23,6 +23,16 @@ Projetos de cambio iniciantes costumam gerar apenas um snapshot momentaneo. Este
 - Registra execucao, sucesso/falha e volume de dados carregados.
 - Persiste dados brutos, curados e analiticos em um data lake S3 opcional.
 
+## Tech Stack
+
+- Linguagem: Python 3.11+ (Pandas, Requests).
+- Banco de Dados: PostgreSQL 16.
+- Data Lake: Amazon S3 (boto3).
+- Orquestracao: Apache Airflow.
+- Analytics Engineering: dbt (Data Build Tool).
+- BI & Visualizacao: Metabase.
+- Infraestrutura & CI/CD: Docker, Docker Compose, GitHub Actions.
+
 ## Arquitetura
 
 Fluxo principal:
@@ -79,17 +89,12 @@ Implementacao de Data Lake com separacao de camadas Bronze (Raw), Silver (Proces
 ### Dashboard BI com Metabase
 ![Dashboard Metabase](docs/images/metabase_dashboard.png)
 
-## Camadas do Data Lake
-
-- Bronze: payload bruto da API, sem enriquecimento.
-- Silver: dados normalizados por moeda e data de referencia.
-- Gold: visao analitica derivada da Silver com taxa anterior, variacao absoluta, variacao percentual, tendencia e ranking por snapshot.
-
-## Modelo Medalhao
+## Arquitetura Medalhao (Data Lake)
 
 - Bronze: raw API response persistido em JSON, sem regras de negocio aplicadas.
-- Silver: dados limpos, normalizados e particionados em Parquet para consumo tecnico e reprocessamento.
-- Gold: modelos analiticos prontos para negocio, com metricas e estruturas consumiveis via dbt e PostgreSQL.
+- Silver: dados limpos, normalizados por moeda e data de referencia, particionados em Parquet para consumo tecnico e reprocessamento.
+- Gold: modelos analiticos prontos para negocio, com taxa anterior, variacao absoluta, variacao percentual, tendencia e ranking por snapshot.
+- Consumo: a camada Gold alimenta modelos dbt, tabelas/views no PostgreSQL e dashboards no Metabase.
 
 ### Consumo analitico em SQL
 ![SQL Analysis](docs/images/sql_results.png)
